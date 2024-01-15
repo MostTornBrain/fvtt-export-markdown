@@ -218,6 +218,35 @@ async function convertLinks(markdown, relativeTo) {
     return markdown;
 }
 
+// Evaluate a math formula to turn it into a number.
+// This is designed to resolve things that reference ceil() or floor()
+// and an item or spell level, such as @Damage or @Template commands.
+// *****************************************************************
+// WARNING: THIS WILL EXECUTE ARBITRARY JAVASCRIPT TEXT CONTAINED IN 
+//          THE MODULES BEING EXPORTED.  ENSURE YOU TRUST THE SOURCE
+//          OF THE DATA YOU ARE EXPORTING!!!
+// *****************************************************************
+function doMath(doc, formula) {
+    let level = doc.level;
+    formula = formula.replaceAll("(@item.level)", level);
+    formula = formula.replaceAll("@item.level", level);
+    formula = formula.replaceAll("ceil", "Math.ceil");
+    formula = formula.replaceAll("floor", "Math.floor");
+    
+    // Don't try to evaluate the formula if it is an actual dice roll
+    if (formula.includes('d') || formula.includes('D')) {
+        return formula;
+    }
+    
+    try {
+        let result = eval(formula);
+        return result;
+    } catch(error) {
+        console.error("Error evaluating: ", formula, error);
+    } 
+    return "MATH_ERROR";
+}
+
 async function convertHtml(doc, html) {
     // Foundry uses "showdown" rather than "turndown":
     // SHOWDOWN fails to parse tables at all
@@ -232,16 +261,126 @@ async function convertHtml(doc, html) {
         // GFM provides supports for strikethrough, tables, taskListItems, highlightedCodeBlock
         gfm = TurndownPluginGfmService.gfm;
         turndownService.use(gfm);
+        
+        // Add a custom rule for handling action-glyph spans.
+        // Convert them to Obsidian PF2E Action Icons plugin format.
+        turndownService.addRule('actionGlyph', {
+          filter: function (node, options) {
+            return (
+              node.nodeName === 'SPAN' &&
+              node.getAttribute('class') === 'action-glyph'
+            );
+          },
+          replacement: function (content, node, options) {
+            // Match the default format used by the PF2E Action Icons plugin
+            switch (content) {
+             // Free action
+             case'F':
+                content = '0';
+                break;
+                
+             // Reaction
+             case 'R':
+                content = 'r';
+                break;
+                
+             // Action - some Foundry entries use 1 (such as most spells), others use 'a'
+             case 'a':
+                content = '1';
+                break;
+            }
+            
+            return '`pf2:' + content + '`';
+          }
+        });
+
     }
     let markdown;
     try {
+        // Convert Foundry roll commands to plain text
+        // Format is [[/r (dice formula) description[sometext]]]{plain text}. 
+        //     We just want to grab the {plain text}
+        const roll2Pattern = /\[\[\/(?:[br]+)\s+(?:.*?)\]\]{(.*?)}/g;
+        markdown = html.replace(roll2Pattern, function(match, p1) {
+                                                    return `${p1}`;
+                                              });
+
+        // Convert another style Foundry roll commands to plain text
+        // Format is [[/r (dice formula) description[sometext]]], 
+        //     where the "description" and [sometext] is optional
+        // The dice formula can contain a level reference as "@item.level".
+        const rollPattern = /\[\[\/r\s+([^\[\]]+)(?:\]|\[\s*([^\[\]]*)\])*\]\]/g;
+        markdown = markdown.replace(rollPattern, function(match, p1, p2) {
+                                               let result = doMath(doc, p1);
+                                               if (p2 && p2 != 'healing'){
+                                                    return `${result} ${p2.replace(/,/g, ' ')}`;
+                                                } else {
+                                                    return result;
+                                                }
+                                              });
+
+        // Convert @"Something" tags to plain text
+        // Sample format: @Damage[(2d6+4)[bludgeoning]]{plain text}
+        // Could be @Damage, @Template, @Check...
+        // Just grab the plain text
+        const genericPattern = /@(?:\w+)\[(?:.*?)\]{(.*?)}/g;
+        markdown = markdown.replace(genericPattern, function(match, p1) {
+                                                        if (match.includes('@UUID')) {
+                                                            return match;
+                                                        } else {
+                                                            return `${p1}`;
+                                                        }
+                                                    });
+
+        // Convert @Damage to plain text
+        // Format is @Damage[(2d6+4)[bludgeoning]]
+        // This one has no descriptive text
+        const damagePattern = /@Damage\[([^\[\]]+)\[(.*?)\]\]/g;
+        markdown = markdown.replace(damagePattern, function(match, p1, p2) {
+                                                        let result = doMath(doc, p1);
+                                                        if (result) {
+                                                            // Remove any wrapping parens
+                                                            result = `${result}`.replace(/^\(|\)$/g, "");
+                                                        }
+                                                        return `${result} ${p2.replace(/,/g, ' ')}`;
+                                                    });
+
+        // Convert @Template with no description to plain text
+        // Format is @Template[type:cone|distance:30]
+        const templatePattern = /@Template\[type:([^\|]+)\|distance:(\d+)\]/g;
+        markdown = markdown.replace(templatePattern, function(match, p1, p2) {
+                                                        return `${p2}-foot ${p1}`;
+                                                    });
+     
+        // Convert @Check with no description to plain text
+        // Format is @Check[type:athletics|dc:15|traits:action:climb]
+        //        or @Check\[type:athletics|traits:action:swim|dc:10\]
+        //        or @Check\[type:flat|dc:16\]
+        // will be converted to "DC 15 Athletics"
+        const checkPattern = /@Check\[type:([^\|]+)\|(?:.*?)dc:(\d+)(?:\|.*?)*\]/g;
+        markdown = markdown.replace(checkPattern, function(match, p1, p2) {
+                                                        p1.charAt(0).toUpperCase() + p1.slice(1);
+                                                        return `DC ${p2} ${p1}`;
+                                                    });
+
+        // Convert @Check for "basic save" to plain text
+        // Format is @Check[type:reflex|dc:resolve(@actor.attributes.spellDC.value)|basic:true]
+        // will be converted to "basic Reflex"
+        const checkBasicPattern = /@Check\[type:([^\|]+)(?:\|.*?)*(?:\|basic:true)*\]/g;
+        markdown = markdown.replace(checkBasicPattern, function(match, p1) {
+                                                        p1.charAt(0).toUpperCase() + p1.slice(1);
+                                                        return `basic ${p1}`;
+                                                    });
+
         // Convert links BEFORE doing HTML->MARKDOWN (to get links inside tables working properly)
         // The conversion "escapes" the "[[...]]" markers, so we have to remove those markers afterwards
-        markdown = turndownService.turndown((await convertLinks(html, doc))).replaceAll("\\[\\[","[[").replaceAll("\\]\\]","]]");
+        markdown = turndownService.turndown((await convertLinks(markdown, doc))).replaceAll("\\[\\[","[[").replaceAll("\\]\\]","]]");
+        
         // Now convert file references
         const filepattern = /!\[\]\(([^)]*)\)/g;
         markdown = markdown.replaceAll(filepattern, replaceLinkedFile);    
     } catch (error) {
+        console.log(error);
         console.warn(`Error: failed to decode html:`, html)
     }
 
@@ -472,8 +611,32 @@ async function maybeTemplate(path, doc) {
     console.log(`Using handlebars template '${templatePath}' for '${doc.name}'`)
 
     // Always upload the IMG, if present, but we won't include the corresponding markdown
-    if (doc.img) fileconvert(doc.img, IMG_SIZE);
+    if (doc.img) {
+        fileconvert(doc.img, IMG_SIZE);
+        // Convert the image path to what is being saved.
+        // NOTE: please observe any license restrictions on images from
+        //       journal entries you do not directly own.  
+        //       See: data/systems/pf2e/licenses for PF2e artwork license information.
+        doc.img = doc.img.replaceAll("/","-").slice(-250 + destForImages.length); 
+    }
 
+    // Some common locations for descriptions
+    const DESCRIPTIONS = [
+        "system.details.biography.value",  // Actor: DND5E
+        "system.details.publicNotes",       // Actor: PF2E
+        "system.description.value",        // Item: DND5E and PF2E
+    ]
+
+    // Convert a few known HTML formatted entries into Markdown
+    // so they can easily be used in a Handlebar without needing further processing.
+    for (const field of DESCRIPTIONS) {
+        let text = foundry.utils.getProperty(doc, field);
+        if (text) {
+            text = await convertHtml(doc, text);
+            foundry.utils.setProperty(doc, field, text)
+        }
+    }
+    
     // Apply the supplied template file:
     // Foundry renderTemplate only supports templates with file extensions: html, handlebars, hbs
     // Foundry filePicker hides all files with extension html, handlebars, hbs

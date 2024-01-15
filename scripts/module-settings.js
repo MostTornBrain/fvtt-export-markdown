@@ -94,6 +94,19 @@ Hooks.once('ready', () => {
             filePicker: "text"
         })
     }
+    
+    // Helper so a handlebar can do "if"-style logic on whether
+    // an array contains a certain value as one of its elements.
+    // Returns "true" if the value is contained in the array.
+    Handlebars.registerHelper('in', function (value, array, options) {
+      // Check if the array includes the given value
+      if (array && array.includes(value)) {
+        return options.fn(this);
+      } else {
+        return options.inverse(this);
+      }
+    });
+
 })
 
 // Add headers for the Actor and Item settings

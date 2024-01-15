@@ -6,7 +6,29 @@
 ![Latest Release Download Count](https://img.shields.io/github/downloads/farling42/fvtt-export-markdown/latest/module.zip)
 ![Forge installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Ffvtt-export-markdown)
 
-# Markdown Exporter
+# Markdown Exporter, changes for PF2E
+
+**NOTE** This is a very rough modification to the original Markdown Exporter so it
+produces more usable Pathfinder 2E Remaster content in markdown format for Obisidian.
+
+This is NOT designed to be module that can be directly imported into Foundry.  The assumption
+is you will merge these changes on top of the existing Markdown Exporter to modify its behavior. 
+
+Currently this only addresses exporting spells.
+
+Modified files are:
+- scripts/export-markdown.js
+- scripts/module-settings.js
+
+After you merge in the changes, you need to restart your world for the changes to the module to 
+take effect..
+
+When exporting the Pathfinder spells, use the included `handlebars/spell_handlebar.hbs`` file.  You'll need to manually copy this to Foundry as the file browser does not let you interact with .hbs files, but the internal handlebar routine require a file extension of .hbs or other appropriate handlebar-relate name, none of which you can see with the Foundry file browser.
+
+Included in this project is a new file `pf2e-spell.css`` which is an 
+Obsidian CSS snippet which can be installed in your .osidian/snippets directory so the spells resemble the new style used in the Player Core and GM Core books.
+
+# Usage
 
 Selecting the "Export to Markdown" option from the Journal Sidebar generates a ZIP file containing the selected journal/folder tree.
 
