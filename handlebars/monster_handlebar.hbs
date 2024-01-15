@@ -1,0 +1,84 @@
+{{! This handlebar is a modified version of one from Josh P.  It will handle Monsters exported from Foundry.  It relies on two modules, Markdown Exporter and More Handlebars Helpers.}}
+---
+title: "{{{name}}}"
+obsidianUIMode: preview
+noteType: pf2eMonster
+aliases: "{{name}}" 
+tags:
+{{#each system.traits.value}}  - pf2e/creature/type/{{this}}
+  {{/each}}
+  - pf2e/creature/level/{{system.details.level.value}}
+statblock: inline
+name: "{{name}}"
+level: {{system.details.level.value}}
+---
+
+```statblock
+columns: 2
+image: "{{#each (more-handlebars-helpers-split img "/")}}{{#if @last}}{{this}}{{/if}}{{/each}}"
+forcecolumns: true
+layout: Basic Pathfinder 2e Layout
+source: "{{system.details.publication.title}}"
+name: "{{name}}"
+level: "Creature {{system.details.level.value}}"
+rare_03: "{{capitalize system.traits.rarity}}"
+alignment: "{{more-handlebars-helpers-table system.details.alignment.value "LG" "Lawful Good" "LN" "Lawful Neutral" "LE" "Lawful Evil" "NG" "Neutral Good" "N" "Neutral" "NE" "Neutral Evil" "CG" "Chaotic Good" "CN" "Chaotic Neutral" "CE" "Chaotic Evil"}}"
+size: "{{more-handlebars-helpers-table system.traits.size.value "ti" "Tiny" "sm" "Small" "med" "Medium" "lg" "Large" "hu" "Huge" "ga" "Gargantuan"}}"
+{{#each system.traits.value as |trait index|}}
+trait_0{{more-handlebars-helpers-add index 1}}: "{{trait}}"
+{{/each}} 
+modifier: {{system.perception.value}}
+perception:
+  - name: "Perception"
+    desc: "Perception +{{system.perception.value}}; {{#each system.perception.senses as |sense|}}{{sense.label}}{{ifThen @last "" ", "}}{{/each}}"
+{{#if system.details.languages.value}}
+languages: "{{system.details.languages.value}}"
+{{/if}}
+skills:
+  - name: "Skills"
+    desc: "{{#each items}}{{#if (eq type "lore")}}__{{name}}__: +{{system.mod.value}}, {{/if}}{{/each}}"
+abilityMods: [{{system.abilities.str.mod}}, {{system.abilities.dex.mod}}, {{system.abilities.con.mod}}, {{system.abilities.int.mod}}, {{system.abilities.wis.mod}}, {{system.abilities.cha.mod}}]
+speed: {{system.attributes.speed.value}} feet,{{#each system.attributes.speed.otherSpeeds}} {{type}} {{value}} feet,{{/each}}
+sourcebook: "_{{system.details.publication.title}}_"
+ac: {{system.attributes.ac.value}}
+armorclass:
+  - name: AC
+    desc: "{{system.attributes.ac.value}}{{#if system.attributes.ac.details}} {{system.attributes.ac.details}}{{/if}}; __Fort__: {{system.saves.fortitude.value}}; __Ref__: {{system.saves.reflex.value}}; __Will__: {{system.saves.will.value}} ;"
+hp: {{system.attributes.hp.value}}
+health:
+  - name: ""
+  - name: HP
+    desc: "{{system.attributes.hp.value}};{{#if system.attributes.immunities}} __Immunities__ {{#each system.attributes.immunities}} {{this.type}},{{/each}};{{/if}}{{#if system.attributes.resistances}} __Resistances__ {{#each system.attributes.resistances}}{{this.type}}{{this.value}}, {{/each}};{{/if}}{{#if system.attributes.weaknesses}} __Weaknesses__ {{#each system.attributes.weaknesses}}{{this.type}} {{this.value}}{{/each}}{{/if}}"
+abilities_top:
+  - name: ""
+{{#each items}}{{#if (eq system.category "interaction")~}}
+{{#unless (eq name "Darkvision")}}
+  - name: "{{name}}"
+    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{system.description.value}}}"
+{{/unless}}{{/if}}{{/each~}}
+abilities_mid:
+  - name: ""
+{{~#each items}}{{#if (eq system.category "defensive")}}
+  - name: "{{name}}"
+    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{system.description.value}}}"
+{{/if}}{{/each~}}
+attacks:
+  - name: ""
+{{#each items}}{{#if (eq type "melee")}}
+  - name: "{{system.weaponType.value}}"
+    desc: "`pf2:1` {{this.name}} +{{system.bonus.value}} ({{system.traits.value}})\n__Damage__ {{#each system.damageRolls}} {{{this.damage}}} {{this.damageType}}{{#if ../system.attackEffects.value}} plus {{../system.attackEffects.value}}{{/if}}{{/each}}"
+{{/if}}{{/each~}}
+{{#each items}}{{#if (eq system.category "offensive")}}
+  - name: "{{name}}"
+    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{system.description.value}}}"
+{{/if}}{{/each}} 
+```
+
+```encounter-table
+name: {{name}}
+creatures:
+  - 1: {{name}}
+```
+
+{{#if system.details.publicNotes}}### Description
+{{{system.details.publicNotes}}}{{/if}}

@@ -160,6 +160,14 @@ let turndownService, gfm;
 
 async function convertLinks(markdown, relativeTo) {
 
+    async function expandOneLocalize(str, type, target, hash, label, offset, string, groups) {
+        if (type == "Localize"){
+            return game.i18n.localize(target);
+        } else {
+            return str;
+        }
+    }
+
     // Needs to be nested so that we have access to 'relativeTo'
     async function replaceOneLink(str, type, target, hash, label, offset, string, groups) {
 
@@ -207,10 +215,14 @@ async function convertLinks(markdown, relativeTo) {
         return formatLink(result, label, /*inline*/false);  // TODO: maybe pass inline if we really want inline inclusion
     }
     
+    // First, localize any @Localize tags - as these might end up containing links, which need to get handled in the next step.
+    const localizePattern = /@(Localize)\[([^#\]]+)(?:#([^\]]+))?](?:{([^}]+)})?/g;
+    markdown = await replaceAsync(markdown, localizePattern, expandOneLocalize);
+ 
     // Convert all the links
     const pattern = /@([A-Za-z]+)\[([^#\]]+)(?:#([^\]]+))?](?:{([^}]+)})?/g;
     markdown = await replaceAsync(markdown, pattern, replaceOneLink);
-    
+   
     // Replace file references (TBD AFTER HTML conversion)
     const filepattern = /!\[\]\(([^)]*)\)/g;
     markdown = markdown.replaceAll(filepattern, replaceLinkedFile);
@@ -620,7 +632,7 @@ async function maybeTemplate(path, doc) {
         doc.img = doc.img.replaceAll("/","-").slice(-250 + destForImages.length); 
     }
 
-    // Some common locations for descriptions
+        // Some common locations for descriptions
     const DESCRIPTIONS = [
         "system.details.biography.value",  // Actor: DND5E
         "system.details.publicNotes",       // Actor: PF2E
@@ -630,13 +642,43 @@ async function maybeTemplate(path, doc) {
     // Convert a few known HTML formatted entries into Markdown
     // so they can easily be used in a Handlebar without needing further processing.
     for (const field of DESCRIPTIONS) {
-        let text = foundry.utils.getProperty(doc, field);
+        let text;
+
+        // Special handling for Actor "items"
+        // as these will be rendered in a statblock.
+        let items = doc.items;
+        if (items) for (const item of items) {
+            text = foundry.utils.getProperty(item, field);
+            if (text) {
+                text = await convertHtml(item, text);
+                
+                // Replace all \n with "\\n" so YAML in the Statblock doesn't break.
+                text = text.replaceAll('\n', '\\n');
+
+                // Replace Markdown "* * *" HR.  It will not work there.
+                text = text.replaceAll('\\n* * *', '\\n');
+
+                // Remove any lingering solitary * at the start of a line, such as bullets.
+                text = text.replaceAll('\\n* ', '\\n');
+
+                // Compress repeated newlines into a single one.
+                text = text.replace(/(\\n)\1+/g, '\\n');
+
+                // Escape all double quotes.
+                text = text.replaceAll('"', '\\"');
+
+                foundry.utils.setProperty(item, field, text)
+            }
+        } 
+
+        // Regular docs
+        text = foundry.utils.getProperty(doc, field);
         if (text) {
             text = await convertHtml(doc, text);
             foundry.utils.setProperty(doc, field, text)
         }
     }
-    
+
     // Apply the supplied template file:
     // Foundry renderTemplate only supports templates with file extensions: html, handlebars, hbs
     // Foundry filePicker hides all files with extension html, handlebars, hbs
