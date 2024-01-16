@@ -625,14 +625,14 @@ async function maybeTemplate(path, doc) {
     // Always upload the IMG, if present, but we won't include the corresponding markdown
     if (doc.img) {
         fileconvert(doc.img, IMG_SIZE);
-        // Convert the image path to what is being saved.
+// Convert the image path to what is being saved.
         // NOTE: please observe any license restrictions on images from
         //       journal entries you do not directly own.  
         //       See: data/systems/pf2e/licenses for PF2e artwork license information.
         doc.img = doc.img.replaceAll("/","-").slice(-250 + destForImages.length); 
     }
 
-        // Some common locations for descriptions
+    // Some common locations for descriptions
     const DESCRIPTIONS = [
         "system.details.biography.value",  // Actor: DND5E
         "system.details.publicNotes",       // Actor: PF2E
@@ -659,7 +659,7 @@ async function maybeTemplate(path, doc) {
                 text = text.replaceAll('\\n* * *', '\\n');
 
                 // Remove any lingering solitary * at the start of a line, such as bullets.
-                text = text.replaceAll('\\n* ', '\\n');
+                // text = text.replaceAll('\\n* ', '\\n');
 
                 // Compress repeated newlines into a single one.
                 text = text.replace(/(\\n)\1+/g, '\\n');

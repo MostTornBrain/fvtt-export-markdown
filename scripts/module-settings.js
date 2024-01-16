@@ -95,15 +95,13 @@ Hooks.once('ready', () => {
         })
     }
     
-    // Helper so a handlebar can do "if"-style logic on whether
-    // an array contains a certain value as one of its elements.
-    // Returns "true" if the value is contained in the array.
-    Handlebars.registerHelper('in', function (value, array, options) {
-      // Check if the array includes the given value
-      if (array && array.includes(value)) {
-        return options.fn(this);
+    Handlebars.registerHelper('trait', function (value) {
+      // Convert a sluggified trait into its localized human-readable text
+      let lookUpText = CONFIG.PF2E.npcAttackTraits[value];
+      if (lookUpText) {
+        return game.i18n.localize(lookUpText)
       } else {
-        return options.inverse(this);
+        return value;
       }
     });
 
