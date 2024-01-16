@@ -37,7 +37,7 @@ skills:
   - name: "Skills"
     desc: "{{#each items}}{{#if (eq type "lore")}}{{name}}: {{numberFormat system.mod.value sign=true}}{{#if system.variants.0.label}} ({{system.variants.0.label}}){{/if}}{{ifThen @last "" ", "}}{{/if}}{{/each}}"
 abilityMods: [{{system.abilities.str.mod}}, {{system.abilities.dex.mod}}, {{system.abilities.con.mod}}, {{system.abilities.int.mod}}, {{system.abilities.wis.mod}}, {{system.abilities.cha.mod}}]
-speed: {{system.attributes.speed.value}} feet{{#each system.attributes.speed.otherSpeeds}}, {{type}} {{value}} feet{{/each}}
+speed: {{#if system.attributes.speed.value}}{{system.attributes.speed.value}} feet{{/if}}{{#each system.attributes.speed.otherSpeeds}}, {{type}} {{value}} feet{{/each}}
 sourcebook: "_{{system.details.publication.title}}_"
 ac: {{system.attributes.ac.value}}
 armorclass:
@@ -65,8 +65,12 @@ attacks:
   - name: ""
 {{#each items}}{{#if (eq type "melee")}}
   - name: "{{capitalize system.weaponType.value}}"
-    desc: "`pf2:1` {{this.name}} +{{system.bonus.value}} ({{#each system.traits.value}}{{lower (trait this)}}{{ifThen @last "" ", "}}{{/each}})\n__Damage__ {{#each system.damageRolls}} {{{this.damage}}} {{this.damageType}}{{#if ../system.attackEffects.value}} plus {{../system.attackEffects.value}}{{/if}}{{/each}}"
+    desc: "`pf2:1` {{this.name}} {{numberFormat system.bonus.value sign=true}} ({{#each system.traits.value}}{{lower (me-trait this)}}{{ifThen @last "" ", "}}{{/each}})\n__Damage__ {{#each system.damageRolls}} {{{this.damage}}} {{this.damageType}}{{#if ../system.attackEffects.value}} plus {{../system.attackEffects.value}}{{/if}}{{/each}}"
 {{/if}}{{/each~}}
+{{#each items as |item|}}{{#if (eq item.type "spellcastingEntry")}}
+  - name: "{{item.name}}"
+    desc: "DC {{item.system.spelldc.dc}}{{#each (me-spellLevels @root.items item.id) as |level|}}; __{{ordinal level}}__ {{me-getSpellSlotCount item level}} _{{me-getSpellList @root.items item.id level}}_{{/each}}{{#if (me-spellLevels @root.items item.id true)}} __Cantrips__ {{#each (me-spellLevels @root.items item.id true) as |level|}}__{{ordinal level}}__ _{{me-getSpellList @root.items item.id level true}}_{{/each}}{{/if}}"
+{{/if}}{{/each}}
 {{#each items}}{{#if (eq system.category "offensive")}}
   - name: "{{name}}"
     desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{system.description.value}}}"

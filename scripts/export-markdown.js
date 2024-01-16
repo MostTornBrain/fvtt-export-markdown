@@ -359,7 +359,8 @@ async function convertHtml(doc, html) {
 
         // Convert @Template with no description to plain text
         // Format is @Template[type:cone|distance:30]
-        const templatePattern = /@Template\[type:([^\|]+)\|distance:(\d+)\]/g;
+        // or @Template\[type:cone|distance:40|traits:arcane,evocation,fire,damaging-effect\]
+        const templatePattern = /@Template\[type:([^\|]+)\|distance:(\d+)(?:\|.*?)*\]/g;
         markdown = markdown.replace(templatePattern, function(match, p1, p2) {
                                                         return `${p2}-foot ${p1}`;
                                                     });
@@ -631,6 +632,8 @@ async function maybeTemplate(path, doc) {
         //       See: data/systems/pf2e/licenses for PF2e artwork license information.
         doc.img = doc.img.replaceAll("/","-").slice(-250 + destForImages.length); 
     }
+
+    // TODO: Make below conversions a handlebars helper instead?
 
     // Some common locations for descriptions
     const DESCRIPTIONS = [

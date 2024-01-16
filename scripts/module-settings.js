@@ -95,16 +95,86 @@ Hooks.once('ready', () => {
         })
     }
     
-    Handlebars.registerHelper('trait', function (value) {
-      // Convert a sluggified trait into its localized human-readable text
-      let lookUpText = CONFIG.PF2E.npcAttackTraits[value];
-      if (lookUpText) {
-        return game.i18n.localize(lookUpText)
-      } else {
-        return value;
-      }
-    });
+  Handlebars.registerHelper('me-trait', function (value) {
+    // Convert a sluggified trait into its localized human-readable text
+    let lookUpText = CONFIG.PF2E.npcAttackTraits[value];
+    if (lookUpText) {
+      return game.i18n.localize(lookUpText)
+    } else {
+      return value;
+    }
+  });
 
+  Handlebars.registerHelper('me-spellLevels', function (items, id, cantrips) {
+    // Return the high-to-low sorted list of spell levels for the given spellCastingAbility ID.
+    // If cantrips = true, return the list of cantrip levels, otherwise return the list
+    // of non-cantrip levels.
+    let item;
+    let level_list = {};
+    if (items) {
+      for (item of items) {
+        if (item.type === 'spell' && item.system.location.value == id) {
+          let level = item.system.level.value;
+          if (cantrips == true) {
+            if (item.isCantrip) {
+              level_list[level] = true;
+            }
+          } else {
+            if (!(item.isCantrip)) {
+              level_list[level] = true;
+            }
+          }
+        }
+      }
+    }
+    const keys = Object.keys(level_list);
+    var collator = new Intl.Collator([], {numeric: true});
+    keys.sort((a, b) => collator.compare(b, a));
+    return keys;
+  });
+
+  Handlebars.registerHelper('me-getSpellSlotCount', function (item, level) {
+    // Return the the spell slot count for the given level in the 
+    // form "(# slots) if it is non-zero.
+
+    const slotKey = "slot" + String(level);
+    let value = "";
+    if (item.system.slots[slotKey]) {
+      if (item.system.slots[slotKey].value != 0) {
+        value = "(" + String(item.system.slots[slotKey].value) + " slots)";
+      }
+    }
+    return value;
+  });
+
+  Handlebars.registerHelper('me-getSpellList', function (items, id, level, cantrips) {
+    // Return the list of spells for a level for the given spellCastingAbility ID.
+    // If cantrips = true, return the list of cantrip spells, otherwise return the list
+    // of non-cantrip spells.
+    let item;
+    let spell_list = [];
+    if (items) {
+      for (item of items) {
+        if (item.type === 'spell' && item.system.location.value == id) {
+          const spell_level = item.system.level.value;
+          if (level == spell_level) {
+            if (cantrips == true) {
+              if (item.isCantrip) {
+                spell_list.push(item.name);
+              }
+            } else {
+              if (!(item.isCantrip)) {
+                spell_list.push(item.name);
+              }
+            }
+          }
+        }
+      }
+    }
+    return spell_list;
+  });
+
+    // End of Hooks Once Ready
 })
 
 // Add headers for the Actor and Item settings
