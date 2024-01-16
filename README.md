@@ -23,7 +23,7 @@ Obsidian CSS snippet which can be installed in your `.obsidian/snippets` directo
 
 # Usage
 
-lease refer to the original project for usage instructions for this module.  They remain the same.
+Please refer to the original project for usage instructions for this module.  They remain the same.
 
 # TODO
 
