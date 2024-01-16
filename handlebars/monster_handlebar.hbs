@@ -15,7 +15,6 @@ level: {{system.details.level.value}}
 
 ```statblock
 columns: 2
-image: "{{#each (more-handlebars-helpers-split img "/")}}{{#if @last}}{{this}}{{/if}}{{/each}}"
 forcecolumns: true
 layout: Basic Pathfinder 2e Layout
 source: "{{system.details.publication.title}}"
@@ -30,25 +29,25 @@ trait_0{{more-handlebars-helpers-add index 1}}: "{{trait}}"
 modifier: {{system.perception.value}}
 perception:
   - name: "Perception"
-    desc: "Perception +{{system.perception.value}}; {{#each system.perception.senses as |sense|}}{{sense.label}}{{ifThen @last "" ", "}}{{/each}}"
+    desc: "{{numberFormat system.perception.value sign=true}}; {{#each system.perception.senses as |sense|}}{{sense.label}}{{ifThen @last "" ", "}}{{/each}}"
 {{#if system.details.languages.value}}
-languages: "{{system.details.languages.value}}"
+languages: "{{#each system.details.languages.value as |language|}}{{language}}{{ifThen @last "" ", "}}{{/each}}"
 {{/if}}
 skills:
   - name: "Skills"
-    desc: "{{#each items}}{{#if (eq type "lore")}}__{{name}}__: +{{system.mod.value}}, {{/if}}{{/each}}"
+    desc: "{{#each items}}{{#if (eq type "lore")}}{{name}}: {{numberFormat system.mod.value sign=true}}{{#if system.variants.0.label}} ({{system.variants.0.label}}){{/if}}{{ifThen @last "" ", "}}{{/if}}{{/each}}"
 abilityMods: [{{system.abilities.str.mod}}, {{system.abilities.dex.mod}}, {{system.abilities.con.mod}}, {{system.abilities.int.mod}}, {{system.abilities.wis.mod}}, {{system.abilities.cha.mod}}]
-speed: {{system.attributes.speed.value}} feet,{{#each system.attributes.speed.otherSpeeds}} {{type}} {{value}} feet,{{/each}}
+speed: {{system.attributes.speed.value}} feet,{{#each system.attributes.speed.otherSpeeds}} {{type}} {{value}} feet{{ifThen @last "" ", "}}{{/each}}
 sourcebook: "_{{system.details.publication.title}}_"
 ac: {{system.attributes.ac.value}}
 armorclass:
   - name: AC
-    desc: "{{system.attributes.ac.value}}{{#if system.attributes.ac.details}} {{system.attributes.ac.details}}{{/if}}; __Fort__: {{system.saves.fortitude.value}}; __Ref__: {{system.saves.reflex.value}}; __Will__: {{system.saves.will.value}} ;"
+    desc: "{{system.attributes.ac.value}}{{#if system.attributes.ac.details}} {{system.attributes.ac.details}}{{/if}}; __Fort__ {{numberFormat system.saves.fortitude.value sign=true}}, __Ref__ {{numberFormat system.saves.reflex.value sign=true}}, __Will__ {{numberFormat system.saves.will.value sign=true}}"
 hp: {{system.attributes.hp.value}}
 health:
   - name: ""
   - name: HP
-    desc: "{{system.attributes.hp.value}};{{#if system.attributes.immunities}} __Immunities__ {{#each system.attributes.immunities}} {{this.type}},{{/each}};{{/if}}{{#if system.attributes.resistances}} __Resistances__ {{#each system.attributes.resistances}}{{this.type}}{{this.value}}, {{/each}};{{/if}}{{#if system.attributes.weaknesses}} __Weaknesses__ {{#each system.attributes.weaknesses}}{{this.type}} {{this.value}}{{/each}}{{/if}}"
+    desc: "{{system.attributes.hp.value}}; {{#if system.attributes.immunities}}__Immunities__ {{#each system.attributes.immunities}} {{this.label}}{{ifThen @last "" ", "}}{{/each}}; {{/if}}{{#if system.attributes.weaknesses}}__Weaknesses__ {{#each system.attributes.weaknesses}}{{this.label}}{{ifThen @last "" ", "}}{{/each}}; {{/if}}{{#if system.attributes.resistances}} __Resistances__ {{#each system.attributes.resistances}}{{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}"
 abilities_top:
   - name: ""
 {{#each items}}{{#if (eq system.category "interaction")~}}
