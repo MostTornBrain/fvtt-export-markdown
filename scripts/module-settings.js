@@ -105,7 +105,7 @@ Hooks.once('ready', () => {
     }
   });
 
-  Handlebars.registerHelper('me-spellLevels', function (items, id, cantrips) {
+  Handlebars.registerHelper('me-spellLevels', function (items, id, spellType) {
     // Return the high-to-low sorted list of spell levels for the given spellCastingAbility ID.
     // If cantrips = true, return the list of cantrip levels, otherwise return the list
     // of non-cantrip levels.
@@ -114,14 +114,18 @@ Hooks.once('ready', () => {
     if (items) {
       for (item of items) {
         if (item.type === 'spell' && item.system.location.value == id) {
-          let level = item.system.level.value;
-          if (cantrips == true) {
+          const level = item.system.location.heightenedLevel ? item.system.location.heightenedLevel : item.system.level.value;
+          if (spellType == 'cantrips') {
             if (item.isCantrip) {
               level_list[level] = true;
             }
           } else {
             if (!(item.isCantrip)) {
-              level_list[level] = true;
+              if (spellType == 'constant' && item.name.includes('(Constant)')){
+                level_list[level] = true;
+              } else if (spellType == 'spells' && !(item.name.includes('(Constant)'))){
+                level_list[level] = true;
+              }
             }
           }
         }
@@ -147,7 +151,7 @@ Hooks.once('ready', () => {
     return value;
   });
 
-  Handlebars.registerHelper('me-getSpellList', function (items, id, level, cantrips) {
+  Handlebars.registerHelper('me-getSpellList', function (items, id, level, spellType) {
     // Return the list of spells for a level for the given spellCastingAbility ID.
     // If cantrips = true, return the list of cantrip spells, otherwise return the list
     // of non-cantrip spells.
@@ -156,15 +160,19 @@ Hooks.once('ready', () => {
     if (items) {
       for (item of items) {
         if (item.type === 'spell' && item.system.location.value == id) {
-          const spell_level = item.system.level.value;
+          const spell_level = item.system.location.heightenedLevel ? item.system.location.heightenedLevel : item.system.level.value;
           if (level == spell_level) {
-            if (cantrips == true) {
+            if (spellType == 'cantrips') {
               if (item.isCantrip) {
                 spell_list.push(item.name);
               }
             } else {
               if (!(item.isCantrip)) {
-                spell_list.push(item.name);
+                if (spellType == 'constant' && item.name.includes('(Constant)')){
+                  spell_list.push(item.name.replace(' (Constant)', ''));
+                } else if (spellType == 'spells' && !(item.name.includes('(Constant)'))){
+                  spell_list.push(item.name);
+                }
               }
             }
           }
