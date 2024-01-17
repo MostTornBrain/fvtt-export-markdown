@@ -50,7 +50,7 @@ health:
     desc: "{{system.attributes.hp.value}}{{#if system.attributes.hp.details}}, {{system.attributes.hp.details}}{{/if}}{{#if system.attributes.immunities}}; __Immunities__ {{#each system.attributes.immunities}} {{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}{{#if system.attributes.weaknesses}}; __Weaknesses__ {{#each system.attributes.weaknesses}}{{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}{{#if system.attributes.resistances}}; __Resistances__ {{#each system.attributes.resistances}}{{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}"
 abilities_top:
   - name: ""
-{{#each items}}{{#if (eq system.category "interaction")}}{{#if (me-HTMLtoYAML system.description.value this) ~}}
+{{#each items}}{{#if (eq system.category "interaction")}}{{#if (me-HTMLtoYAML system.description.value this)}}
   - name: "{{name}}"
     desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
 {{/if}}{{/if}}{{/each~}}
