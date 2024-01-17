@@ -1,4 +1,5 @@
 import * as MOD_CONFIG from "./config.js"
+import { convertHtml } from './export-markdown.js';
 
 /*
  * MODULE OPTIONS
@@ -181,6 +182,56 @@ Hooks.once('ready', () => {
     }
     return spell_list;
   });
+
+  Handlebars.registerHelper('me-HTMLtoYAML', function (text, context, options) {
+    if (text) {
+
+      // First, check if this item is a reference to another entry. 
+      // If it is, remove any localize tags as it is redundent text
+      // from the reference.
+      if (context && context.flags && context.flags.core && context.flags.core.sourceId) {
+        const localizePattern = /@(Localize)\[([^#\]]+)(?:#([^\]]+))?](?:{([^}]+)})?/g;
+        text = text.replace(localizePattern, '');
+      }
+
+      text = convertHtml(context, text);
+
+      // Replace all \n with "\\n" so YAML in the Statblock doesn't break.
+      text = text.replaceAll('\n', '\\n');
+
+      // Replace Markdown "* * *" HR.  It will not work there.
+      text = text.replaceAll('\\n* * *', '\\n');
+
+      // Remove any lingering solitary * at the start of a line, such as bullets.
+      // text = text.replaceAll('\\n* ', '\\n');
+
+      // Compress repeated newlines into a single one.
+      text = text.replace(/(\\n)\1+/g, '\\n');
+
+      // Escape all double quotes.
+      text = text.replaceAll('"', '\\"');
+
+      // TODO: If we end of with only whitespace, return ''
+      text = text.replace(/^\w+$/g, '');
+    }
+    return text;
+  });
+
+  Handlebars.registerHelper('me-HTMLtoMarkdown', function (text, context) {
+     if (text) {
+      text = convertHtml(context, text);
+    }
+    return text;
+  });
+
+  Handlebars.registerHelper('me-debugDumpObject', function (msg, options) {
+    // Simple debug console dump of the current object being used by the handlebar. 
+    // This is much better than the text file JSON dump you can get from Foundry 
+    // as the debug console view lets you drill down and see normally hidden items 
+    // that can still be referenced via the handlebar.
+    console.log(msg, options);
+  });
+
 
     // End of Hooks Once Ready
 })

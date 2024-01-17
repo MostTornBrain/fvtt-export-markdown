@@ -158,9 +158,9 @@ function notefilename(doc) {
 
 let turndownService, gfm;
 
-async function convertLinks(markdown, relativeTo) {
+function convertLinks(markdown, relativeTo) {
 
-    async function expandOneLocalize(str, type, target, hash, label, offset, string, groups) {
+    function expandOneLocalize(str, type, target, hash, label, offset, string, groups) {
         if (type == "Localize"){
             return game.i18n.localize(target);
         } else {
@@ -169,7 +169,7 @@ async function convertLinks(markdown, relativeTo) {
     }
 
     // Needs to be nested so that we have access to 'relativeTo'
-    async function replaceOneLink(str, type, target, hash, label, offset, string, groups) {
+    function replaceOneLink(str, type, target, hash, label, offset, string, groups) {
 
         // One of my Foundry Modules introduced adding "inline" to the start of type.
         let inline = type.startsWith("inline");
@@ -190,7 +190,7 @@ async function convertLinks(markdown, relativeTo) {
 
         let linkdoc;
         try {
-            linkdoc = await fromUuid(target, {relative: relativeTo});
+            linkdoc = fromUuidSync(target, {relative: relativeTo});
             if (!label && !hash) label = doc.name;
         } catch (error) {
             console.debug(`Unable to fetch label from Compendium for ${target}`, error)
@@ -217,11 +217,11 @@ async function convertLinks(markdown, relativeTo) {
     
     // First, localize any @Localize tags - as these might end up containing links, which need to get handled in the next step.
     const localizePattern = /@(Localize)\[([^#\]]+)(?:#([^\]]+))?](?:{([^}]+)})?/g;
-    markdown = await replaceAsync(markdown, localizePattern, expandOneLocalize);
+    markdown = markdown.replace(localizePattern, expandOneLocalize);
  
     // Convert all the links
     const pattern = /@([A-Za-z]+)\[([^#\]]+)(?:#([^\]]+))?](?:{([^}]+)})?/g;
-    markdown = await replaceAsync(markdown, pattern, replaceOneLink);
+    markdown = markdown.replace(pattern, replaceOneLink);
    
     // Replace file references (TBD AFTER HTML conversion)
     const filepattern = /!\[\]\(([^)]*)\)/g;
@@ -259,7 +259,7 @@ function doMath(doc, formula) {
     return "MATH_ERROR";
 }
 
-async function convertHtml(doc, html) {
+export function convertHtml(doc, html) {
     // Foundry uses "showdown" rather than "turndown":
     // SHOWDOWN fails to parse tables at all
 
@@ -364,7 +364,7 @@ async function convertHtml(doc, html) {
         markdown = markdown.replace(templatePattern, function(match, p1, p2) {
                                                         return `${p2}-foot ${p1}`;
                                                     });
-     
+
         // Convert @Check with no description to plain text
         // Format is @Check[type:athletics|dc:15|traits:action:climb]
         //        or @Check\[type:athletics|traits:action:swim|dc:10\]
@@ -387,8 +387,8 @@ async function convertHtml(doc, html) {
 
         // Convert links BEFORE doing HTML->MARKDOWN (to get links inside tables working properly)
         // The conversion "escapes" the "[[...]]" markers, so we have to remove those markers afterwards
-        markdown = turndownService.turndown((await convertLinks(markdown, doc))).replaceAll("\\[\\[","[[").replaceAll("\\]\\]","]]");
-        
+        markdown = turndownService.turndown((convertLinks(markdown, doc))).replaceAll("\\[\\[","[[").replaceAll("\\]\\]","]]");
+
         // Now convert file references
         const filepattern = /!\[\]\(([^)]*)\)/g;
         markdown = markdown.replaceAll(filepattern, replaceLinkedFile);    
@@ -413,7 +413,7 @@ function frontmatter(doc, showheader=true) {
 }
 
 
-async function oneJournal(path, journal) {
+function oneJournal(path, journal) {
     let subpath = path;
     if (journal.pages.size > 1) {
         // Put all the notes in a sub-folder
@@ -434,7 +434,7 @@ async function oneJournal(path, journal) {
             case "text":
                 switch (page.text.format) {
                     case 1: // HTML
-                        markdown = await convertHtml(page, page.text.content);
+                        markdown = convertHtml(page, page.text.content);
                         break;
                     case 2: // MARKDOWN
                         markdown = page.text.markdown;
@@ -594,7 +594,7 @@ async function documentToJSON(path, doc) {
     ]
     for (const field of DESCRIPTIONS) {
         let text = foundry.utils.getProperty(doc, field);
-        if (text) markdown += await convertHtml(doc, text) + EOL + EOL;
+        if (text) markdown += convertHtml(doc, text) + EOL + EOL;
     }
 
     let datastring;
@@ -608,7 +608,7 @@ async function documentToJSON(path, doc) {
     // TODO: maybe extract Items as separate notes?
 
     // Convert LINKS: Foundry syntax to Markdown syntax
-    datastring = await convertLinks(datastring, doc);
+    datastring = convertLinks(datastring, doc);
 
     markdown +=
         MARKER + doc.documentName + EOL + 
@@ -626,60 +626,11 @@ async function maybeTemplate(path, doc) {
     // Always upload the IMG, if present, but we won't include the corresponding markdown
     if (doc.img) {
         fileconvert(doc.img, IMG_SIZE);
-// Convert the image path to what is being saved.
+        // Convert the image path to what is being saved.
         // NOTE: please observe any license restrictions on images from
         //       journal entries you do not directly own.  
         //       See: data/systems/pf2e/licenses for PF2e artwork license information.
         doc.img = doc.img.replaceAll("/","-").slice(-250 + destForImages.length); 
-    }
-
-    // TODO: Make below conversions a handlebars helper instead?
-
-    // Some common locations for descriptions
-    const DESCRIPTIONS = [
-        "system.details.biography.value",  // Actor: DND5E
-        "system.details.publicNotes",       // Actor: PF2E
-        "system.description.value",        // Item: DND5E and PF2E
-    ]
-
-    // Convert a few known HTML formatted entries into Markdown
-    // so they can easily be used in a Handlebar without needing further processing.
-    for (const field of DESCRIPTIONS) {
-        let text;
-
-        // Special handling for Actor "items"
-        // as these will be rendered in a statblock.
-        let items = doc.items;
-        if (items) for (const item of items) {
-            text = foundry.utils.getProperty(item, field);
-            if (text) {
-                text = await convertHtml(item, text);
-                
-                // Replace all \n with "\\n" so YAML in the Statblock doesn't break.
-                text = text.replaceAll('\n', '\\n');
-
-                // Replace Markdown "* * *" HR.  It will not work there.
-                text = text.replaceAll('\\n* * *', '\\n');
-
-                // Remove any lingering solitary * at the start of a line, such as bullets.
-                // text = text.replaceAll('\\n* ', '\\n');
-
-                // Compress repeated newlines into a single one.
-                text = text.replace(/(\\n)\1+/g, '\\n');
-
-                // Escape all double quotes.
-                text = text.replaceAll('"', '\\"');
-
-                foundry.utils.setProperty(item, field, text)
-            }
-        } 
-
-        // Regular docs
-        text = foundry.utils.getProperty(doc, field);
-        if (text) {
-            text = await convertHtml(doc, text);
-            foundry.utils.setProperty(doc, field, text)
-        }
     }
 
     // Apply the supplied template file:
@@ -695,7 +646,7 @@ async function maybeTemplate(path, doc) {
 
 async function oneDocument(path, doc) {
     if (doc instanceof JournalEntry)
-        await oneJournal(path, doc);
+        oneJournal(path, doc);
     else if (doc instanceof RollTable)
         await oneRollTable(path, doc);
     else if (doc instanceof Scene && game.settings.get(MOD_CONFIG.MODULE_NAME, MOD_CONFIG.OPTION_LEAFLET))
@@ -717,7 +668,7 @@ async function oneChatMessage(path, message) {
     if (!html?.length) return message.export();
 
     return `## ${new Date(message.timestamp).toLocaleString()}\n\n` + 
-        await convertHtml(message, html[0].outerHTML);
+        convertHtml(message, html[0].outerHTML);
 }
 
 async function oneChatLog(path, chatlog) {
@@ -865,7 +816,7 @@ Hooks.once('init', async () => {
             callback: async header => {
                 const li = header.closest(".directory-item")[0];
                 // li.dataset.uuid does not exist in Foundry V10
-                const folder = await fromUuid(`Folder.${li.dataset.folderId}`);
+                const folder = fromUuidSync(`Folder.${li.dataset.folderId}`);
                 if (folder) exportMarkdown(folder, ziprawfilename(folder.name, folder.type));
             },
         });

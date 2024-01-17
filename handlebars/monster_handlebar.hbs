@@ -50,17 +50,16 @@ health:
     desc: "{{system.attributes.hp.value}}{{#if system.attributes.hp.details}}, {{system.attributes.hp.details}}{{/if}}{{#if system.attributes.immunities}}; __Immunities__ {{#each system.attributes.immunities}} {{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}{{#if system.attributes.weaknesses}}; __Weaknesses__ {{#each system.attributes.weaknesses}}{{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}{{#if system.attributes.resistances}}; __Resistances__ {{#each system.attributes.resistances}}{{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}"
 abilities_top:
   - name: ""
-{{#each items}}{{#if (eq system.category "interaction")~}}
-{{#unless (eq name "Darkvision")}}{{#unless (eq name "Low-Light Vision")}}
+{{#each items}}{{#if (eq system.category "interaction")}}{{#if (me-HTMLtoYAML system.description.value this) ~}}
   - name: "{{name}}"
-    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{system.description.value}}}"
-{{/unless}}{{/unless}}{{/if}}{{/each~}}
+    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
+{{/if}}{{/if}}{{/each~}}
 abilities_mid:
   - name: ""
-{{~#each items}}{{#if (eq system.category "defensive")}}
+{{~#each items}}{{#if (eq system.category "defensive")}}{{#if (me-HTMLtoYAML system.description.value this)}}
   - name: "{{name}}"
-    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{else}}{{#if system.actionType.value}}{{#if (eq system.actionType.value "passive")}}{{else}}{{{more-handlebars-helpers-table system.actionType.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}}{{/if}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{system.description.value}}}"
-{{/if}}{{/each~}}
+    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{else}}{{#if system.actionType.value}}{{#if (eq system.actionType.value "passive")}}{{else}}{{{more-handlebars-helpers-table system.actionType.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}}{{/if}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
+{{/if}}{{/if}}{{/each~}}
 attacks:
   - name: ""
 {{#each items}}{{#if (eq type "melee")}}
@@ -74,10 +73,10 @@ attacks:
     {{~#if (me-spellLevels @root.items item.id 'cantrips')}}\n__Cantrips__ {{#each (me-spellLevels @root.items item.id 'cantrips') as |level|}} __({{ordinal level}})__ _{{me-getSpellList @root.items item.id level 'cantrips'}}_{{/each}}{{/if}}
     {{~#if (me-spellLevels @root.items item.id 'constant')}}\n__Constant__ {{#each (me-spellLevels @root.items item.id 'constant') as |level|}} __({{ordinal level}})__ _{{me-getSpellList @root.items item.id level 'constant'}}_{{/each}}{{/if}}"
 {{/if}}{{/each}}
-{{#each items}}{{#if (eq system.category "offensive")}}
+{{#each items}}{{#if (eq system.category "offensive")}}{{#if (me-HTMLtoYAML system.description.value this)}}
   - name: "{{name}}"
-    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{system.description.value}}}"
-{{/if}}{{/each}} 
+    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
+{{/if}}{{/if}}{{/each}} 
 ```
 
 ```encounter-table
@@ -87,4 +86,4 @@ creatures:
 ```
 
 {{#if system.details.publicNotes}}### Description
-{{{system.details.publicNotes}}}{{/if}}
+{{{me-HTMLtoMarkdown system.details.publicNotes system}}}{{/if}}
