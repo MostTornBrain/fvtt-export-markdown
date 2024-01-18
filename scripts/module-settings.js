@@ -152,6 +152,30 @@ Hooks.once('ready', () => {
     return value;
   });
 
+  Handlebars.registerHelper('me-equipmentList', function (items) {
+    // Return the list of items with the system.equipped property present.
+    let equipmentList = [];
+    for (const item of items) {
+      if (item.system.equipped) {
+        let quantity = item.system.quantity ? item.system.quantity : 1;
+
+        let linkName = item?.flags?.core?.sourceId;
+        if (!linkName) {
+          linkName = item.name;
+        } else {
+          linkName = `[[${item.flags.core.sourceId}|${item.name}]]`;
+        }
+
+        // If quantity is 1, don't show it.
+        if (quantity > 1) {
+          linkName = `${quantity}x ${linkName}`;
+        }        
+        equipmentList.push(linkName);
+      }
+    }
+    return equipmentList;
+  });
+
   Handlebars.registerHelper('me-getSpellList', function (items, id, level, spellType) {
     // Return the list of spells for a level for the given spellCastingAbility ID.
     // If cantrips = true, return the list of cantrip spells, otherwise return the list
@@ -159,7 +183,7 @@ Hooks.once('ready', () => {
     let item;
     let spell_list = [];
     if (items) {
-      for (item of items) {
+      for (const item of items) {
         if (item.type === 'spell' && item.system.location.value == id) {
           const spell_level = item.system.location.heightenedLevel ? item.system.location.heightenedLevel : item.system.level.value;
           if (level == spell_level) {
@@ -204,30 +228,18 @@ Hooks.once('ready', () => {
       // First, check if this item is a reference to another entry. 
       // If it is, remove any localize tags as it is redundent text
       // from the reference.
-      if (context && context.flags && context.flags.core && context.flags.core.sourceId) {
+      if (context?.flags?.core?.sourceId) {
         const localizePattern = /@(Localize)\[([^#\]]+)(?:#([^\]]+))?](?:{([^}]+)})?/g;
         text = text.replace(localizePattern, '');
       }
 
-      text = convertHtml(context, text);
+      text = convertHtml(context, text)
+        .replaceAll('\n', '\\n')       // Replace all \n with "\\n" so YAML in the Statblock doesn't break.
+        .replaceAll('\\n* * *', '\\n') // Replace Markdown "* * *" HR.  It will not work there.
+        .replace(/(\\n)\1+/g, '\\n')   // Compress repeated newlines into a single one.
+        .replaceAll('"', '\\"')        // Escape all double quotes.
+        .replace(/^\w+$/g, '');        // If we end up with only whitespace, return ''
 
-      // Replace all \n with "\\n" so YAML in the Statblock doesn't break.
-      text = text.replaceAll('\n', '\\n');
-
-      // Replace Markdown "* * *" HR.  It will not work there.
-      text = text.replaceAll('\\n* * *', '\\n');
-
-      // Remove any lingering solitary * at the start of a line, such as bullets.
-      // text = text.replaceAll('\\n* ', '\\n');
-
-      // Compress repeated newlines into a single one.
-      text = text.replace(/(\\n)\1+/g, '\\n');
-
-      // Escape all double quotes.
-      text = text.replaceAll('"', '\\"');
-
-      // TODO: If we end of with only whitespace, return ''
-      text = text.replace(/^\w+$/g, '');
     }
     return text;
   });

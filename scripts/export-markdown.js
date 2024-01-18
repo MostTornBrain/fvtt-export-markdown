@@ -330,7 +330,13 @@ export function convertHtml(doc, html) {
                                                     //  Strip anything after a # to handle this example: [[/br 1d4 #minutes]] 
                                                     // It gets matched by the above pattern as part of the die roll and 
                                                     // the regex is already hard to read. 
-                                                    return result.split('#')[0];
+                                                    
+                                                    // If result is a number return it
+                                                    if (typeof result === 'number') {
+                                                        return result;
+                                                    } else {
+                                                        return result.split('#')[0];
+                                                    }
                                                 }
                                               });
 
