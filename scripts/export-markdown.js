@@ -321,13 +321,16 @@ export function convertHtml(doc, html) {
         // Format is [[/r (dice formula) description[sometext]]], 
         //     where the "description" and [sometext] is optional
         // The dice formula can contain a level reference as "@item.level".
-        const rollPattern = /\[\[\/r\s+([^\[\]]+)(?:\]|\[\s*([^\[\]]*)\])*\]\]/g;
+        const rollPattern = /\[\[\/(?:[br]+)\s+([^\[\]]+)(?:\]|\[\s*([^\[\]]*)\])*\]\]/g;
         markdown = markdown.replace(rollPattern, function(match, p1, p2) {
                                                let result = doMath(doc, p1);
-                                               if (p2 && p2 != 'healing'){
+                                               if (p2 && p2 != 'healing' && !p2.includes('#')){
                                                     return `${result} ${p2.replace(/,/g, ' ')}`;
                                                 } else {
-                                                    return result;
+                                                    //  Strip anything after a # to handle this example: [[/br 1d4 #minutes]] 
+                                                    // It gets matched by the above pattern as part of the die roll and 
+                                                    // the regex is already hard to read. 
+                                                    return result.split('#')[0];
                                                 }
                                               });
 

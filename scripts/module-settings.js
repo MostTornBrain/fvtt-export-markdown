@@ -165,14 +165,14 @@ Hooks.once('ready', () => {
           if (level == spell_level) {
             if (spellType == 'cantrips') {
               if (item.isCantrip) {
-                spell_list.push(item.name);
+                spell_list.push(item);
               }
             } else {
               if (!(item.isCantrip)) {
                 if (spellType == 'constant' && item.name.includes('(Constant)')){
-                  spell_list.push(item.name.replace(' (Constant)', ''));
+                  spell_list.push(item);
                 } else if (spellType == 'spells' && !(item.name.includes('(Constant)'))){
-                  spell_list.push(item.name);
+                  spell_list.push(item);
                 }
               }
             }
@@ -180,7 +180,22 @@ Hooks.once('ready', () => {
         }
       }
     }
-    return spell_list;
+
+    // We now have a list of spells, as their full JSON item. 
+    // Alphabetize the list based on name.
+    spell_list.sort((a, b) => a.name.localeCompare(b.name));
+
+    let spell_names = [];
+    for (const spell of spell_list) {
+      // We don't want the 'constant' label on spells.
+      const newName = spell.name.replace(' (Constant)', '');
+      
+      // Revise the spell names so they are links to the referenced spells.
+      const fullName = `[[${spell.flags.core.sourceId}|${newName}]]`;
+      spell_names.push(fullName);
+    }
+    
+    return spell_names;
   });
 
   Handlebars.registerHelper('me-HTMLtoYAML', function (text, context, options) {
