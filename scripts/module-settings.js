@@ -115,7 +115,7 @@ Hooks.once('ready', () => {
     if (items) {
       for (item of items) {
         if (item.type === 'spell' && item.system.location.value == id) {
-          const level = item.system.location.heightenedLevel ? item.system.location.heightenedLevel : item.system.level.value;
+          const level = item.system.location.heightenedLevel || item.level || item.system.level.value;
           if (spellType == 'cantrips') {
             if (item.isCantrip) {
               level_list[level] = true;
@@ -185,7 +185,7 @@ Hooks.once('ready', () => {
     if (items) {
       for (const item of items) {
         if (item.type === 'spell' && item.system.location.value == id) {
-          const spell_level = item.system.location.heightenedLevel ? item.system.location.heightenedLevel : item.system.level.value;
+          const spell_level = item.system.location.heightenedLevel || item.level || item.system.level.value;
           if (level == spell_level) {
             if (spellType == 'cantrips') {
               if (item.isCantrip) {

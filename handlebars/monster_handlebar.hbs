@@ -3,7 +3,7 @@
 title: "{{{name}}}"
 obsidianUIMode: preview
 noteType: pf2eMonster
-aliases: "{{name}}" 
+aliases: "{{{name}}}" 
 tags:
 {{#each system.traits.value}}  - pf2e/creature/type/{{this}}
   {{/each}}
@@ -18,7 +18,7 @@ columns: 2
 forcecolumns: true
 layout: Basic Pathfinder 2e Layout
 source: "{{system.details.publication.title}}"
-name: "{{name}}"
+name: "{{{name}}}"
 level: "Creature {{system.details.level.value}}"
 {{#if (eq system.traits.rarity "common")}}{{else}}rare_03: "{{capitalize system.traits.rarity}}"{{/if}}
 alignment: "{{more-handlebars-helpers-table system.details.alignment.value "LG" "Lawful Good" "LN" "Lawful Neutral" "LE" "Lawful Evil" "NG" "Neutral Good" "N" "Neutral" "NE" "Neutral Evil" "CG" "Chaotic Good" "CN" "Chaotic Neutral" "CE" "Chaotic Evil"}}"
@@ -35,7 +35,7 @@ languages: "{{#each system.details.languages.value as |language|}}{{capitalize l
 {{/if}}
 skills:
   - name: "Skills"
-    desc: "{{#each items}}{{#if (eq type "lore")}}{{name}}: {{numberFormat system.mod.value sign=true}}{{#if system.variants.0.label}} ({{system.variants.0.label}}){{/if}}{{ifThen @last "" ", "}}{{/if}}{{/each}}"
+    desc: "{{#each items}}{{#if (eq type "lore")}}{{{name}}}: {{numberFormat system.mod.value sign=true}}{{#if system.variants.0.label}} ({{system.variants.0.label}}){{/if}}{{ifThen @last "" ", "}}{{/if}}{{/each}}"
 abilityMods: [{{system.abilities.str.mod}}, {{system.abilities.dex.mod}}, {{system.abilities.con.mod}}, {{system.abilities.int.mod}}, {{system.abilities.wis.mod}}, {{system.abilities.cha.mod}}]
 speed: {{#if system.attributes.speed.value}}{{system.attributes.speed.value}} feet{{#if system.attributes.speed.otherSpeeds}}, {{/if}}{{/if}}{{#each system.attributes.speed.otherSpeeds}} {{type}} {{value}} feet{{ifThen @last "" ", "}}{{/each}}
 sourcebook: "_{{system.details.publication.title}}_"
@@ -55,13 +55,13 @@ abilities_top:
     desc: "{{#each (me-equipmentList items)}}{{this}}{{ifThen @last '' ', '}}{{/each}}"
 {{~/if}}
 {{#each items}}{{#if (eq system.category "interaction")}}{{#if (or (me-HTMLtoYAML system.description.value this) system.actions.value)}}
-  - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{name}}]]{{else}}{{name}}{{/if}}"
+  - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}"
     desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
 {{/if}}{{/if}}{{/each}}
 abilities_mid:
   - name: ""
 {{~#each items}}{{#if (eq system.category "defensive")}}{{#if (or (me-HTMLtoYAML system.description.value this) (or system.actions.value (and system.actionType.value (ne system.actionType.value "passive"))))}}
-  - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{name}}]]{{else}}{{name}}{{/if}}"
+  - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}"
     desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{else}}{{#if system.actionType.value}}{{#if (eq system.actionType.value "passive")}}{{else}}{{{more-handlebars-helpers-table system.actionType.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}}{{/if}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
 {{/if}}{{/if}}{{/each}}
 attacks:
@@ -78,15 +78,15 @@ attacks:
     {{~#if (me-spellLevels @root.items item.id 'constant')}}\n__Constant__ {{#each (me-spellLevels @root.items item.id 'constant') as |level|}} __({{ordinal level}})__ {{#each (me-getSpellList @root.items item.id level 'constant')}}_{{{this}}}_{{ifThen @last '' ', '}}{{/each}}{{/each}}{{/if}}"
 {{/if}}{{/each}}
 {{#each items}}{{#if (eq system.category "offensive")}}{{#if (or (me-HTMLtoYAML system.description.value this) system.actions.value)}}
-  - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{name}}]]{{else}}{{name}}{{/if}}"
+  - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}"
     desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
 {{/if}}{{/if}}{{/each}} 
 ```
 
 ```encounter-table
-name: {{name}}
+name: {{{name}}}
 creatures:
-  - 1: {{name}}
+  - 1: {{{name}}}
 ```
 
 {{#if system.details.publicNotes}}### Description
