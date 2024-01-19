@@ -77,7 +77,7 @@ attacks:
     {{~#if (me-spellLevels @root.items item.id 'cantrips')}}\n__Cantrips__ {{#each (me-spellLevels @root.items item.id 'cantrips') as |level|}} __({{ordinal level}})__ {{#each (me-getSpellList @root.items item.id level 'cantrips')}}_{{{this}}}_{{ifThen @last '' ', '}}{{/each}}{{/each}}{{/if}}
     {{~#if (me-spellLevels @root.items item.id 'constant')}}\n__Constant__ {{#each (me-spellLevels @root.items item.id 'constant') as |level|}} __({{ordinal level}})__ {{#each (me-getSpellList @root.items item.id level 'constant')}}_{{{this}}}_{{ifThen @last '' ', '}}{{/each}}{{/each}}{{/if}}"
 {{/if}}{{/each}}
-{{#each items}}{{#if (eq system.category "offensive")}}{{#if (me-HTMLtoYAML system.description.value this)}}
+{{#each items}}{{#if (eq system.category "offensive")}}{{#if (or (me-HTMLtoYAML system.description.value this) system.actions.value)}}
   - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{name}}]]{{else}}{{name}}{{/if}}"
     desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
 {{/if}}{{/if}}{{/each}} 
