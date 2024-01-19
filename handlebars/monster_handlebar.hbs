@@ -73,9 +73,9 @@ attacks:
 {{#each items as |item|}}{{#if (eq item.type "spellcastingEntry")}}
   - name: "{{item.name}}"
     desc: "{{#if (eq item.system.prepared.value 'focus')}}{{@root.system.resources.focus.value}} Focus Point{{#if (gt @root.system.resources.focus.value 1)}}s{{/if}}, {{/if}}DC {{item.system.spelldc.dc}}
-    {{~#each (me-spellLevels @root.items item.id 'spells') as |level|}}; __{{ordinal level}} __ {{me-getSpellSlotCount item level}} {{#each (me-getSpellList @root.items item.id level 'spells')}}_{{this}}_{{ifThen @last '' ', '}}{{/each}}{{/each}}
-    {{~#if (me-spellLevels @root.items item.id 'cantrips')}}\n__Cantrips__ {{#each (me-spellLevels @root.items item.id 'cantrips') as |level|}} __({{ordinal level}})__ {{#each (me-getSpellList @root.items item.id level 'cantrips')}}_{{this}}_{{ifThen @last '' ', '}}{{/each}}{{/each}}{{/if}}
-    {{~#if (me-spellLevels @root.items item.id 'constant')}}\n__Constant__ {{#each (me-spellLevels @root.items item.id 'constant') as |level|}} __({{ordinal level}})__ {{#each (me-getSpellList @root.items item.id level 'constant')}}_{{this}}_{{ifThen @last '' ', '}}{{/each}}{{/each}}{{/if}}"
+    {{~#each (me-spellLevels @root.items item.id 'spells') as |level|}}; __{{ordinal level}} __ {{me-getSpellSlotCount item level}} {{#each (me-getSpellList @root.items item.id level 'spells')}}_{{{this}}}_{{ifThen @last '' ', '}}{{/each}}{{/each}}
+    {{~#if (me-spellLevels @root.items item.id 'cantrips')}}\n__Cantrips__ {{#each (me-spellLevels @root.items item.id 'cantrips') as |level|}} __({{ordinal level}})__ {{#each (me-getSpellList @root.items item.id level 'cantrips')}}_{{{this}}}_{{ifThen @last '' ', '}}{{/each}}{{/each}}{{/if}}
+    {{~#if (me-spellLevels @root.items item.id 'constant')}}\n__Constant__ {{#each (me-spellLevels @root.items item.id 'constant') as |level|}} __({{ordinal level}})__ {{#each (me-getSpellList @root.items item.id level 'constant')}}_{{{this}}}_{{ifThen @last '' ', '}}{{/each}}{{/each}}{{/if}}"
 {{/if}}{{/each}}
 {{#each items}}{{#if (eq system.category "offensive")}}{{#if (me-HTMLtoYAML system.description.value this)}}
   - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{name}}]]{{else}}{{name}}{{/if}}"
