@@ -52,7 +52,7 @@ abilities_top:
   - name: ""
 {{#if (me-equipmentList items)}}
   - name: "Items"
-    desc: "{{#each (me-equipmentList items)}}{{this}}{{ifThen @last '' ', '}}{{/each}}"
+    desc: "{{#each (me-equipmentList items)}}{{{this}}}{{ifThen @last '' ', '}}{{/each}}"
 {{~/if}}
 {{#each items}}{{#if (eq system.category "interaction")}}{{#if (or (me-HTMLtoYAML system.description.value this) system.actions.value)}}
   - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}"
@@ -72,14 +72,17 @@ attacks:
 {{/if}}{{/each~}}
 {{#each items as |item|}}{{#if (eq item.type "spellcastingEntry")}}
   - name: "{{item.name}}"
-    desc: "{{#if (eq item.system.prepared.value 'focus')}}{{@root.system.resources.focus.value}} Focus Point{{#if (gt @root.system.resources.focus.value 1)}}s{{/if}}, {{/if}}DC {{item.system.spelldc.dc}}
+    desc: "{{#if (eq item.system.prepared.value 'focus')}}{{@root.system.resources.focus.value}} Focus Point{{#if (gt @root.system.resources.focus.value 1)}}s{{/if}}, {{/if}}DC {{item.system.spelldc.dc}}, attack {{numberFormat item.system.spelldc.value sign=true}}
     {{~#each (me-spellLevels @root.items item.id 'spells') as |level|}}; __{{ordinal level}} __ {{me-getSpellSlotCount item level}} {{#each (me-getSpellList @root.items item.id level 'spells')}}_{{{this}}}_{{ifThen @last '' ', '}}{{/each}}{{/each}}
-    {{~#if (me-spellLevels @root.items item.id 'cantrips')}}\n__Cantrips__ {{#each (me-spellLevels @root.items item.id 'cantrips') as |level|}} __({{ordinal level}})__ {{#each (me-getSpellList @root.items item.id level 'cantrips')}}_{{{this}}}_{{ifThen @last '' ', '}}{{/each}}{{/each}}{{/if}}
-    {{~#if (me-spellLevels @root.items item.id 'constant')}}\n__Constant__ {{#each (me-spellLevels @root.items item.id 'constant') as |level|}} __({{ordinal level}})__ {{#each (me-getSpellList @root.items item.id level 'constant')}}_{{{this}}}_{{ifThen @last '' ', '}}{{/each}}{{/each}}{{/if}}"
-{{/if}}{{/each}}
+    {{~#if (me-spellLevels @root.items item.id 'cantrips')}}\n__Cantrips__ {{#each (me-spellLevels @root.items item.id 'cantrips') as |level|}} __({{ordinal level}})__ {{#each (me-getSpellList @root.items item.id level 'cantrips')}}_{{{this}}}_{{#if system.location.uses.value}} (x{{system.location.uses.value}}){{/if}}{{ifThen @last '' ', '}}{{/each}}{{/each}}{{/if}}
+    {{~#if (me-spellLevels @root.items item.id 'constant')}}\n__Constant__ {{#each (me-spellLevels @root.items item.id 'constant') as |level|}} __({{ordinal level}})__ {{#each (me-getSpellList @root.items item.id level 'constant')}}_{{{this}}}_{{#if system.location.uses.value}} (x{{system.location.uses.value}}){{/if}}{{ifThen @last '' ', '}}{{/each}}{{/each}}{{/if}}"
+{{/if}}{{/each}}{{#if (me-getRituals items)}}
+  - name: "Rituals"
+    desc: "{{#each (me-getRituals items)}}_{{{this}}}_{{ifThen @last '' ', '}}{{/each}}"
+{{/if}}
 {{#each items}}{{#if (eq system.category "offensive")}}{{#if (or (me-HTMLtoYAML system.description.value this) system.actions.value)}}
   - name: "{{#if flags.core.sourceId}}[[{{flags.core.sourceId}}|{{{name}}}]]{{else}}{{{name}}}{{/if}}"
-    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
+    desc: "{{#if system.actions.value}}{{{more-handlebars-helpers-table system.actions.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{else}}{{#if (eq system.actionType.value 'reaction')}}`pf2:r`{{/if}}{{/if}} {{#if system.traits.value}}({{system.traits.value}}){{/if}} {{{me-HTMLtoYAML system.description.value this}}}"
 {{/if}}{{/if}}{{/each}} 
 ```
 

@@ -176,6 +176,36 @@ Hooks.once('ready', () => {
     return equipmentList;
   });
 
+  Handlebars.registerHelper('me-getRituals', function (items, ) {
+    // Return the list of ritual spells.
+    let item;
+    let spell_list = [];
+    if (items) {
+      for (const item of items) {
+        if (item.isRitual) {
+          spell_list.push(item);
+        }
+      }
+    }
+
+    // We now have a list of rituals, as their full JSON item. 
+    // Alphabetize the list based on name.
+    spell_list.sort((a, b) => a.name.localeCompare(b.name));
+
+    let spell_names = [];
+    for (const spell of spell_list) {
+      if (spell?.flags?.core?.sourceId) {
+        // Revise the ritual names so they are links to the referenced spells.
+        const fullName = `[[${spell.flags.core.sourceId}|${spell.name}]]`;
+        spell_names.push(fullName);
+      } else {
+        spell_names.push(spell.name);
+      }
+    }
+    
+    return spell_names;
+  });
+
   Handlebars.registerHelper('me-getSpellList', function (items, id, level, spellType) {
     // Return the list of spells for a level for the given spellCastingAbility ID.
     // If cantrips = true, return the list of cantrip spells, otherwise return the list
@@ -212,7 +242,14 @@ Hooks.once('ready', () => {
     let spell_names = [];
     for (const spell of spell_list) {
       // We don't want the 'constant' label on spells.
-      const newName = spell.name.replace(' (Constant)', '');
+      let newName = spell.name.replace(' (Constant)', '');
+
+      // Append the number of uses to the spell name if it exists.
+      const uses = spell.system?.location?.uses?.value;
+
+      if (uses && uses > 1) {
+        newName = newName + ` (x${uses})`;
+      }
       
       // Revise the spell names so they are links to the referenced spells.
       const fullName = `[[${spell.flags.core.sourceId}|${newName}]]`;

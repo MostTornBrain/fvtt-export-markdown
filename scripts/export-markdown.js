@@ -233,30 +233,41 @@ function convertLinks(markdown, relativeTo) {
 // Evaluate a math formula to turn it into a number.
 // This is designed to resolve things that reference ceil() or floor()
 // and an item or spell level, such as @Damage or @Template commands.
-// *****************************************************************
-// WARNING: THIS WILL EXECUTE ARBITRARY JAVASCRIPT TEXT CONTAINED IN 
-//          THE MODULES BEING EXPORTED.  ENSURE YOU TRUST THE SOURCE
-//          OF THE DATA YOU ARE EXPORTING!!!
-// *****************************************************************
+/**
+ * Performs mathematical calculations based on the given formula.
+ * @param {Object} doc - The document object.
+ * @param {string} formula - The mathematical formula to be evaluated.
+ * @returns {number|string} - The result of the calculation or "MATH_ERROR" if an error occurs.
+ */
 function doMath(doc, formula) {
+    let result = ''; 
+    
+    // Remove any outermost parens
+    formula = formula.replace(/^\((.*)\)$/, '$1');
+
+    // Replace any @item references with the item's level
     let level = doc.level;
     formula = formula.replaceAll("(@item.level)", level);
     formula = formula.replaceAll("@item.level", level);
-    formula = formula.replaceAll("ceil", "Math.ceil");
-    formula = formula.replaceAll("floor", "Math.floor");
-    
-    // Don't try to evaluate the formula if it is an actual dice roll
-    if (formula.includes('d') || formula.includes('D')) {
-        return formula;
+    formula = formula.replaceAll("(@item.rank)", level);
+    formula = formula.replaceAll("@item.rank", level);
+
+    if (!formula.includes('d') && !formula.includes('D')) {
+        // No dice, so just evaluate the expression
+        result = Roll.safeEval(formula);
+    } else {
+        // There be dice in this expression - we need to do special parsing
+        let rollTerms = Roll.parse(formula);
+        for (let term of rollTerms) {
+            if (term instanceof ParentheticalTerm || term instanceof MathTerm) {
+                 result = result + Roll.safeEval(term.formula);
+            } else {
+                result = result + term.formula;
+            }
+        }
     }
-    
-    try {
-        let result = eval(formula);
-        return result;
-    } catch(error) {
-        console.error("Error evaluating: ", formula, error);
-    } 
-    return "MATH_ERROR";
+
+    return result;  
 }
 
 export function convertHtml(doc, html) {
@@ -355,6 +366,7 @@ export function convertHtml(doc, html) {
 
         // Convert @Damage to plain text
         // Format is @Damage[(2d6+4)[bludgeoning]]
+        // or        @Damage[(@item.level+1)d10[vitality]]
         // This one has no descriptive text
         const damagePattern = /@Damage\[([^\[\]]+)\[(.*?)\]\]/g;
         markdown = markdown.replace(damagePattern, function(match, p1, p2) {
