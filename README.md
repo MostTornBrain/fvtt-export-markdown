@@ -26,7 +26,7 @@ Please refer to the original project for usage instructions for this module.  Th
 # TODO
 
 ## Currently in process:
-* spot checking the data for Spells, Monsters, and HAzards comparing to the printed PDFs to ensure the handlebars are not missing important data for the export.
+* spot checking the data for Spells, Monsters, and HAzards comparing to the published PDFs to ensure the handlebars are not missing important data for the export.
 
 ## Future:
 Convert the rest of the document types, such as Glossary, Actions, etc.
