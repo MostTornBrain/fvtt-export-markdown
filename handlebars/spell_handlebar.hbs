@@ -17,7 +17,7 @@ tags:
 {{/if~}}
 aliases: ["{{{name}}}"]
 ---
-# {{{name}}} {{#if actionGlyph}} {{{ more-handlebars-helpers-table system.time.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`"}}}{{/if}}  
+# {{{name}}} {{#if actionGlyph}} {{{ more-handlebars-helpers-table system.time.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`" "1 to 2" "`pf2:1` to `pf2:2`" "1 to 3" "`pf2:1` to `pf2:3`"}}}{{/if}}  
 ## {{#if isRitual}}Ritual{{else}}{{#if isCantrip}}Cantrip{{else}}{{#if isFocusSpell}}Focus{{else}}Spell{{/if}}{{/if}}{{/if}} {{system.level.value}}
 ### {{{ more-handlebars-helpers-table system.traits.rarity "common" "" "uncommon" "[uncommon](uncommon \"Uncommon Rarity Trait\")" "rare" "[rare](rare \"Rare Rarity Trait\")" "unique" "[unique](unique \"Unique Rarity Trait\")"}}}
 {{~#each system.traits.value}}

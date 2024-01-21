@@ -1,10 +1,10 @@
 
-.pf2e-spell .metadata-container {
+.pf2e .metadata-container {
     visibility: hidden;
     content: none;
 }
 
-.pf2e-spell {
+.pf2e {
     background-color: rgb(246,244,242);
 }
 
@@ -47,7 +47,7 @@
   border: none;
 }
 
-.pf2e-spell h3 {
+.pf2e h3 {
     font-size: 12px;
     font-weight: 900;
     line-height: 1.33em;
@@ -59,7 +59,7 @@
     margin: 0;
 }
 
-.pf2e-spell h3 a {
+.pf2e h3 a {
     font-size: inherit;
     font-weight: inherit;
     line-height: inherit;
@@ -87,7 +87,7 @@
     pointer-events:none;
 }
 
-.pf2e-spell h3 a.internal-link[title="Uncommon Rarity Trait"] {
+.pf2e h3 a.internal-link[title="Uncommon Rarity Trait"] {
     background: rgb(152, 81, 61);
     border-color: #d9c484;
     background-clip: border-box;
@@ -115,4 +115,28 @@
   margin-top: 3px;
   margin-bottom: 1;
   line-height: 1.2;
+}
+
+
+.pf2e-action h1 {
+  font-size: 1.3em;
+  font-weight: 700;
+  line-height: 1.5em;
+  text-transform: uppercase;
+  color: rgb(51,51,51);
+  font-family: system-ui, "Pathfinder";
+  background-color: rgb(246,244,242);
+  margin: 0;
+}
+
+.pf2e hr {
+  margin: 0!important;
+  height: 0.5em;
+}
+
+/* Remove the fancy hr image - just display a simple line */
+.pf2e hr::after {
+  content: none!important; /* Remove the generated content */
+  border: none!important;  /* Remove any borders */
+  height: 0!important;     /* Remove any height */
 }

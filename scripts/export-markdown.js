@@ -240,6 +240,7 @@ function convertLinks(markdown, relativeTo) {
  * @returns {number|string} - The result of the calculation or "MATH_ERROR" if an error occurs.
  */
 function doMath(doc, formula) {
+    //console.log(`doMath: ${formula}`);
     let result = ''; 
     
     // Remove any outermost parens
@@ -251,6 +252,11 @@ function doMath(doc, formula) {
     formula = formula.replaceAll("@item.level", level);
     formula = formula.replaceAll("(@item.rank)", level);
     formula = formula.replaceAll("@item.rank", level);
+
+    // Replace any @actor references with 1 as that is how the
+    // feat descriptions that use this syntax are generally written.
+    formula = formula.replaceAll("(@actor.level)", 1);
+    formula = formula.replaceAll("@actor.level", 1);
 
     if (!formula.includes('d') && !formula.includes('D')) {
         // No dice, so just evaluate the expression
@@ -267,6 +273,7 @@ function doMath(doc, formula) {
         }
     }
 
+    //console.log(`doMath: ${formula} = ${result}`);
     return result;  
 }
 
@@ -368,7 +375,7 @@ export function convertHtml(doc, html) {
         // Format is @Damage[(2d6+4)[bludgeoning]]
         // or        @Damage[(@item.level+1)d10[vitality]]
         // This one has no descriptive text
-        const damagePattern = /@Damage\[([^\[\]]+)\[(.*?)\]\]/g;
+        const damagePattern = /@Damage\[([^\[\]]+)\[(.*?)\](?:\|.*?)*\]/g;
         markdown = markdown.replace(damagePattern, function(match, p1, p2) {
                                                         let result = doMath(doc, p1);
                                                         if (result) {
@@ -414,7 +421,7 @@ export function convertHtml(doc, html) {
         const filepattern = /!\[\]\(([^)]*)\)/g;
         markdown = markdown.replaceAll(filepattern, replaceLinkedFile);    
     } catch (error) {
-        console.log(error);
+        console.warn(error);
         console.warn(`Error: failed to decode html:`, html)
     }
 
