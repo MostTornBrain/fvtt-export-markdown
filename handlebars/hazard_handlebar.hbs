@@ -22,21 +22,21 @@ level: "Hazard {{system.details.level.value}}"
 trait_0{{add index 1}}: "{{trait}}"
 {{/each}}
 sourcebook: "_{{{system.details.publication.title}}}_"
+{{#if system.attributes.ac.value}}
 armorclass:
   - name: AC
     desc: "{{system.attributes.ac.value}}{{#if system.attributes.ac.details}} {{system.attributes.ac.details}}{{/if}}; __Fort__ {{numberFormat system.saves.fortitude.value sign=true}}, __Ref__ {{numberFormat system.saves.reflex.value sign=true}}, __Will__ {{numberFormat system.saves.will.value sign=true}}{{#if system.attributes.allSaves.value}}; {{system.attributes.allSaves.value}}{{/if}}"
-perception:
-  - name: ""
-{{#if system.attributes.stealth}}
-  - name: "Stealth" 
-    desc: "{{#if (me-HTMLtoYAML system.attributes.stealth.details system)}}{{{me-HTMLtoYAML system.attributes.stealth.details system}}}{{else}}DC {{numberFormat system.attributes.stealth.value sign=true}}{{/if}}"
-{{/if}}
-{{#if system.attributes.hp.value}}
 hp: {{system.attributes.hp.value}}
 health:
   - name: ""
   - name: "HP"
     desc: "{{system.attributes.hp.value}}{{#if system.attributes.hp.details}}, {{system.attributes.hp.details}}{{/if}}{{#if system.attributes.hardness.value}}; __Hardness__ {{system.attributes.hardness.value}}{{else}}{{#if system.attributes.hardness}}; __Hardness__ {{system.attributes.hardness}}{{/if}}{{/if}}{{#if system.attributes.immunities}}; __Immunities__ {{#each system.attributes.immunities}} {{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}{{#if system.attributes.weaknesses}}; __Weaknesses__ {{#each system.attributes.weaknesses}}{{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}{{#if system.attributes.resistances}}; __Resistances__ {{#each system.attributes.resistances}}{{this.label}}{{ifThen @last "" ", "}}{{/each}}{{/if}}"
+{{/if}}
+perception:
+  - name: ""
+{{#if system.attributes.stealth}}
+  - name: "Stealth DC {{add system.attributes.stealth.value 10}}" 
+    desc: "{{#if (me-HTMLtoYAML system.attributes.stealth.details system)}}{{{me-HTMLtoYAML system.attributes.stealth.details system}}}{{else}} {{numberFormat system.attributes.stealth.value sign=true}}{{/if}}"
 {{/if}}
 abilities_top:
   - name: ""
