@@ -388,6 +388,11 @@ export function convertHtml(doc, html) {
                                                             // Remove any wrapping parens
                                                             result = `${result}`.replace(/^\(|\)$/g, "");
                                                         }
+                                                        // If p2 has an @tag of the format "@xxx.flags.pf2e..."
+                                                        // remove that part of the string.
+                                                        if (p2.includes('@')) {
+                                                            p2 = p2.replace(/@.*?\.pf2e\.\S+/g, '');
+                                                        }
                                                         return `${result} ${p2.replace(/,/g, ' ')}`;
                                                     });
 
@@ -405,18 +410,18 @@ export function convertHtml(doc, html) {
         // Convert @Template with no description to plain text
         // Format is @Template[type:cone|distance:30]
         // or @Template\[type:cone|distance:40|traits:arcane,evocation,fire,damaging-effect\]
-        const templatePattern = /@Template\[type:([^\|]+)\|distance:(\d+)(?:\|.*?)*\]/g;
+        const templatePattern = /@Template\[type:([^\|\]]+)\|distance:(\d+)(?:\|.*?)*\]/g;
         markdown = markdown.replace(templatePattern, function(match, p1, p2) {
                                                         return `${p2}-foot ${p1}`;
                                                     });
 
         // Convert @Check with no description to plain text
         // Format is @Check[type:athletics|dc:15|traits:action:climb]
-        //        or @Check\[type:athletics|traits:action:swim|dc:10\]
-        //        or @Check\[type:flat|dc:16\]
+        //        or @Check[type:athletics|traits:action:swim|dc:10]
+        //        or @Check[type:flat|dc:16]
         //        or @Check[fortitude|dc:42]
         // will be converted to "DC 15 Athletics"
-        const checkPattern = /@Check\[(?:type:)*([^\|]+)\|(?:.*?)dc:(\d+)(?:\|.*?)*\]/g;
+        const checkPattern = /@Check\[(?:type:)*([^\|\]]+)\|(?:.*?)dc:(\d+)(?:\|.*?)*\]/g;
         markdown = markdown.replace(checkPattern, function(match, p1, p2) {
                                                         // Convert sluggified p1 to more friendly label
                                                         p1 = p1.split("-").map(word=>word.slice(0,1).toUpperCase()+word.slice(1)).join(" ");
@@ -428,7 +433,7 @@ export function convertHtml(doc, html) {
         //        or @Check[type:astrology-lore]
         //        or @Check[type:athletics|defense:reflex] 
         // will be converted to "basic Reflex"
-        const checkBasicPattern = /@Check\[type:([^\|\]]+)(?:\|.*?)*(\|basic:true)*\]/g;
+        const checkBasicPattern = /@Check\[(?:type:)*([^\|\]]+)(?:\|.*?)*(\|basic:true)*\]/g;
         markdown = markdown.replace(checkBasicPattern, function(match, p1, basic) {
                                                         // Convert sluggified p1 to more friendly label
                                                         p1 = p1.split("-").map(word=>word.slice(0,1).toUpperCase()+word.slice(1)).join(" ");
@@ -520,7 +525,7 @@ async function oneRollTable(path, table) {
     for (const tableresult of table.results) {
         const range  = (tableresult.range[0] == tableresult.range[1]) ? tableresult.range[0] : `${tableresult.range[0]}-${tableresult.range[1]}`;
         // Escape the "|" in any links
-        markdown += `| ${range} | ${(await convertLinks(tableresult.getChatText(), table)).replaceAll("|","\\|")} |\n`;
+        markdown += `| ${range} | ${(await convertHtml(table, tableresult.getChatText())).replaceAll("|","\\|")} |\n`;
     }
 
     // No path for tables
