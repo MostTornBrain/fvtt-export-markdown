@@ -91,6 +91,8 @@ name: {{{name}}}
 creatures:
   - 1: {{{name}}}
 ```
+{{#if system.details.blurb}}### Description
+{{{me-HTMLtoMarkdown system.details.blurb system}}}{{/if}}
 
 {{#if system.details.publicNotes}}### Description
 {{{me-HTMLtoMarkdown system.details.publicNotes system}}}{{/if}}

@@ -158,15 +158,15 @@ function notefilename(doc) {
 
 let turndownService, gfm;
 
-function convertLinks(markdown, relativeTo) {
-
-    function expandOneLocalize(str, type, target, hash, label, offset, string, groups) {
-        if (type == "Localize"){
-            return game.i18n.localize(target);
-        } else {
-            return str;
-        }
+function expandOneLocalize(str, type, target, hash, label, offset, string, groups) {
+    if (type == "Localize"){
+        return game.i18n.localize(target);
+    } else {
+        return str;
     }
+}
+
+function convertLinks(markdown, relativeTo) {
 
     // Needs to be nested so that we have access to 'relativeTo'
     function replaceOneLink(str, type, target, hash, label, offset, string, groups) {
@@ -278,6 +278,7 @@ function doMath(doc, formula) {
 }
 
 export function convertHtml(doc, html) {
+
     // Foundry uses "showdown" rather than "turndown":
     // SHOWDOWN fails to parse tables at all
 
@@ -327,11 +328,16 @@ export function convertHtml(doc, html) {
     }
     let markdown;
     try {
+            
+        // First, localize any @Localize tags - as these might end up containing links or other @tags, which need to get handled later.
+        const localizePattern = /@(Localize)\[([^#\]]+)(?:#([^\]]+))?](?:{([^}]+)})?/g;
+        markdown = html.replace(localizePattern, expandOneLocalize);
+    
         // Convert Foundry roll commands to plain text
         // Format is [[/r (dice formula) description[sometext]]]{plain text}. 
         //     We just want to grab the {plain text}
         const roll2Pattern = /\[\[\/(?:[br]+)\s+(?:.*?)\]\]{(.*?)}/g;
-        markdown = html.replace(roll2Pattern, function(match, p1) {
+        markdown = markdown.replace(roll2Pattern, function(match, p1) {
                                                     return `${p1}`;
                                               });
 
@@ -385,6 +391,17 @@ export function convertHtml(doc, html) {
                                                         return `${result} ${p2.replace(/,/g, ' ')}`;
                                                     });
 
+        // Convert simple @Damager[2d4] to plain text
+        const damage2Pattern = /@Damage\[([^\[\]]+)\]/g;
+        markdown = markdown.replace(damage2Pattern, function(match, p1) {
+                                                        let result = doMath(doc, p1);
+                                                        if (result) {
+                                                            // Remove any wrapping parens
+                                                            result = `${result}`.replace(/^\(|\)$/g, "");
+                                                        }
+                                                        return result;
+                                                    });
+                                            
         // Convert @Template with no description to plain text
         // Format is @Template[type:cone|distance:30]
         // or @Template\[type:cone|distance:40|traits:arcane,evocation,fire,damaging-effect\]
@@ -397,20 +414,30 @@ export function convertHtml(doc, html) {
         // Format is @Check[type:athletics|dc:15|traits:action:climb]
         //        or @Check\[type:athletics|traits:action:swim|dc:10\]
         //        or @Check\[type:flat|dc:16\]
+        //        or @Check[fortitude|dc:42]
         // will be converted to "DC 15 Athletics"
-        const checkPattern = /@Check\[type:([^\|]+)\|(?:.*?)dc:(\d+)(?:\|.*?)*\]/g;
+        const checkPattern = /@Check\[(?:type:)*([^\|]+)\|(?:.*?)dc:(\d+)(?:\|.*?)*\]/g;
         markdown = markdown.replace(checkPattern, function(match, p1, p2) {
-                                                        p1.charAt(0).toUpperCase() + p1.slice(1);
+                                                        // Convert sluggified p1 to more friendly label
+                                                        p1 = p1.split("-").map(word=>word.slice(0,1).toUpperCase()+word.slice(1)).join(" ");
                                                         return `DC ${p2} ${p1}`;
                                                     });
 
         // Convert @Check for "basic save" to plain text
         // Format is @Check[type:reflex|dc:resolve(@actor.attributes.spellDC.value)|basic:true]
+        //        or @Check[type:astrology-lore]
+        //        or @Check[type:athletics|defense:reflex] 
         // will be converted to "basic Reflex"
-        const checkBasicPattern = /@Check\[type:([^\|]+)(?:\|.*?)*(?:\|basic:true)*\]/g;
-        markdown = markdown.replace(checkBasicPattern, function(match, p1) {
-                                                        p1.charAt(0).toUpperCase() + p1.slice(1);
-                                                        return `basic ${p1}`;
+        const checkBasicPattern = /@Check\[type:([^\|\]]+)(?:\|.*?)*(\|basic:true)*\]/g;
+        markdown = markdown.replace(checkBasicPattern, function(match, p1, basic) {
+                                                        // Convert sluggified p1 to more friendly label
+                                                        p1 = p1.split("-").map(word=>word.slice(0,1).toUpperCase()+word.slice(1)).join(" ");
+
+                                                        if (basic) {
+                                                            return `basic ${p1}`;
+                                                        } else {
+                                                            return p1;
+                                                        }   
                                                     });
 
         // Convert links BEFORE doing HTML->MARKDOWN (to get links inside tables working properly)
