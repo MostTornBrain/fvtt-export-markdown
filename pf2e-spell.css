@@ -1,7 +1,9 @@
 
 .pf2e .metadata-container {
-    visibility: hidden;
-    content: none;
+  visibility: hidden;
+  content: hidden;
+  height: 0!important;
+  margin: 0!important;
 }
 
 .pf2e {
@@ -139,4 +141,19 @@
   content: none!important; /* Remove the generated content */
   border: none!important;  /* Remove any borders */
   height: 0!important;     /* Remove any height */
+}
+
+.hideProperties .metadata-container {
+  visibility: hidden;
+  content: hidden;
+  height: 0!important;
+  margin: 0!important;
+}
+
+.hideProperties .metadata-content {
+  visibility: hidden;
+  content: hidden;
+  display: none;
+  height: 0!important;
+  margin: 0!important;
 }
