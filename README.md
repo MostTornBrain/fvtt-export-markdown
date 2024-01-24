@@ -106,7 +106,7 @@ At this point, it is recommended to reload Obsidian to ensure all the plugins an
 ![Reload](Screenshots/ReloadApp.png)
 
 ## Enjoy!
-At this point, you should have a vault with the compendium fully linked files.  Monsters hould look like this:
+At this point, you should have a vault with the compendium fully linked files.  Monsters should look like this:
 
 ![GoblinPyro](Screenshots/GoblinPyro.png)
 
