@@ -11,9 +11,9 @@ is you will merge these changes on top of the existing Markdown Exporter to modi
 
 Detailed instructions are in the next section.  What follows here is a quick overview of the process:
 
-Modified files are:
-- scripts/export-markdown.js
-- scripts/module-settings.js
+Modified files to the Markdown Exporter module are:
+- `scripts/export-markdown.js`
+- `scripts/module-settings.js`
 
 After you merge in the changes, you need to restart your world for the changes to the module to 
 take effect..
