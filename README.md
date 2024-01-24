@@ -29,7 +29,7 @@ This process requires you have a Foundry account with World with the **Pathfinde
 * Markdown Exporter
 * More Handlebars Helpers
 
-## 2. Apply this github packages changes to Foundry
+## 2. Apply this github package's changes to Foundry
 After you have installed the above 3 packages, locate the Markdown Exporter installation in your Foundry directory.   It should be in a directory named `Data/modules/export-markdown`.  Within that directory you should see a `scripts/` folder.   Within that folder you should see the following files:
 ``` 
 config.js		lib			render-template.js
