@@ -120,4 +120,4 @@ And spells should look like this:
 * spot checking the data for Spells, Monsters, and HAzards comparing to the published PDFs to ensure the handlebars are not missing important data for the export.
 
 ## Future:
-Convert the rest of the document types, such as Glossary, Actions, etc.
+Convert the rest of the document types, such as Glossary, Actions, equipment (to include cost, weight, etc.).
