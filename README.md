@@ -1,11 +1,15 @@
 
 # Markdown Exporter, changes for PF2E
 
+# Process Overview
+
 **NOTE** This is a very rough modification to the original Markdown Exporter so it
 produces more usable Pathfinder 2E Remaster content in markdown format for Obisidian.
 
 This is NOT designed to be module that can be directly imported into Foundry.  The assumption
 is you will merge these changes on top of the existing Markdown Exporter to modify its behavior. 
+
+Detailed instructions are in the next section.  What follows here is a quick overview of the process:
 
 Modified files are:
 - scripts/export-markdown.js
