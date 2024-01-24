@@ -72,7 +72,7 @@ If you want to export the whole Compendium, you can go to the compendium menu an
 ![Compendium](Screenshots/Compendium.png)
 
 ## 6. Customize your Vault
-The exported data requires a few extra plugins in Obsidian to be view in the best format.
+The exported data requires a few extra plugins in Obsidian to be viewed in the best format.
 ### Install and enable the following plugins. 
 * Fantasy Statblocks
 * Pathfinder 2E Action Icons
