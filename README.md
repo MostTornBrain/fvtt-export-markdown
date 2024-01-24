@@ -25,7 +25,7 @@ Obsidian CSS snippet which can be installed in your `.obsidian/snippets` directo
 
 # Detailed Installation Instructions
 
-This process requires you have a Foundry account with World with the **Pathfinder Second Edition** package selected as the Game System.
+This process requires you have a Foundry account with a World with the **Pathfinder Second Edition** package selected as the Game System.
 ![Game System](Screenshots/GameSystem.png)
 
 ## 1. Install the following required modules:
