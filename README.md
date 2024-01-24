@@ -79,6 +79,7 @@ For the Fantasy Statblocks, you can go into its settings and disable the built-i
 ![FantasyStatblocks](Screenshots/FantasyStatblocksPlugin.png)
 
 
+The Front Matter Ttitle plugin will automatically hide filenames and replace them with the `title:` property in a note's frontmatter.  This helps hide the non-friendly unique filenames and links that Markdown Exporter generated. It will not affect any existing notes that do not have a `title:` property. 
 For the Front Matter Title plugin, there are a few recommended settings:
 
 ![FontmatterTitle](Screenshots/FrontMatterTitleSettings.png)
