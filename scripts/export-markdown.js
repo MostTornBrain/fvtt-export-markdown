@@ -368,12 +368,12 @@ export function convertHtml(doc, html) {
         // Sample format: @Damage[(2d6+4)[bludgeoning]]{plain text}
         // Could be @Damage, @Template, @Check...
         // Just grab the plain text
-        const genericPattern = /@(?:\w+)\[(?:.*?)\]{(.*?)}/g;
-        markdown = markdown.replace(genericPattern, function(match, p1) {
+        const genericPattern = /@(?:\w+)\[((?:[^[\]]|\[[^[\]]*\])*)\]\{([^}]*)\}/g
+        markdown = markdown.replace(genericPattern, function(match, p1, p2) {
                                                         if (match.includes('@UUID')) {
                                                             return match;
                                                         } else {
-                                                            return `${p1}`;
+                                                            return `${p2}`;
                                                         }
                                                     });
 
