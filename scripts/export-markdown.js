@@ -11,6 +11,9 @@ const FRONTMATTER = "---\n";
 const EOL = "\n";
 const MARKER = "```";
 
+// These conditions all have a numeric level and they get created with a file name with a 1 appended to the end.
+const SPECIAL_CONDITIONS = ["Clumsy", "Doomed", "Drained", "Dying", "Enfeebled", "Frightened", "Sickened", "Slowed", "Stunned", "Stupefied", "Wounded"];
+
 const destForImages = "zz_asset-files";
 
 let zip;
@@ -244,7 +247,7 @@ function convertMarkdownLinks(markdown, relativeTo) {
 
         let linkdoc;
         try {
-            linkdoc = fromUuidSync(target, {relative: relativeTo});
+            linkdoc = fromUuidSync(target);
             if (!label) label = doc.name;
         } catch (error) {
             console.debug(`Unable to fetch label from Compendium for ${target}`, error)
@@ -252,17 +255,25 @@ function convertMarkdownLinks(markdown, relativeTo) {
         }
 
         //console.log("Linkdoc:", linkdoc, target, label);
-        if (!linkdoc) return dummyLink();
-        let result = linkdoc.name;
-
-        // Lookup the friendly name of the path, so we can use it as a prefix for the link.
-        let pack = game.packs.get(linkdoc.pack);
-        if (pack) {
-            result = `${pack.title}/${result}`;
+        if (linkdoc) {
+            target = linkdoc.name;
         }
-        //console.log("pack:", pack);
 
-        return formatLink(result, label, /*inline*/false);  // TODO: maybe pass inline if we really want inline inclusion
+        // Append a 1 to the condition since the filename will have a 1 appended to it.
+        if (SPECIAL_CONDITIONS.includes(target)) {
+            target = `${target} 1`;
+        }
+
+        if (linkdoc) {
+            // Lookup the friendly name of the path, so we can use it as a prefix for the link to make it more unique.
+            let pack = game.packs.get(linkdoc.pack);
+            if (pack) {
+                target = `${pack.title}/${target}`;
+            }
+            //console.log("pack:", pack);
+        }
+
+        return formatLink(target, label, /*inline*/false);  // TODO: maybe pass inline if we really want inline inclusion
     }
     
     // Convert all the links with UUIDs to human readable links
