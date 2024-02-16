@@ -106,7 +106,8 @@ function formatLink(link, label=null, inline=false) {
     if (label && label != link) body += `|${label}`;
     let result = `[[${body}]]`;
     if (inline) result = "!" + result;
-    return result;
+    // Remove any backslashes from the link
+    return result.replaceAll("\\","");
 }
 
 function fileconvert(filename, label_or_size=null, inline=true) {
@@ -212,6 +213,7 @@ function convertLinks(markdown, relativeTo) {
                 if (!label) label = toc[hash].text;
             }
         }
+
         return formatLink(result, label, /*inline*/false);  // TODO: maybe pass inline if we really want inline inclusion
     }
     
@@ -229,6 +231,49 @@ function convertLinks(markdown, relativeTo) {
 
     return markdown;
 }
+
+function convertMarkdownLinks(markdown, relativeTo) {
+
+    // Needs to be nested so that we have access to 'relativeTo'
+    function replaceOneLink(str, target, label) {
+
+        function dummyLink() {
+            // Make sure that "|" in the ID don't start the label early (e.g. @PDF[whatever|page=name]{label})
+            return formatLink(target, label);
+        }
+
+        let linkdoc;
+        try {
+            linkdoc = fromUuidSync(target, {relative: relativeTo});
+            if (!label) label = doc.name;
+        } catch (error) {
+            console.debug(`Unable to fetch label from Compendium for ${target}`, error)
+            return dummyLink();
+        }
+
+        //console.log("Linkdoc:", linkdoc, target, label);
+        if (!linkdoc) return dummyLink();
+        let result = linkdoc.name;
+
+        // Lookup the friendly name of the path, so we can use it as a prefix for the link.
+        let pack = game.packs.get(linkdoc.pack);
+        if (pack) {
+            result = `${pack.title}/${result}`;
+        }
+        //console.log("pack:", pack);
+
+        return formatLink(result, label, /*inline*/false);  // TODO: maybe pass inline if we really want inline inclusion
+    }
+    
+    // Convert all the links with UUIDs to human readable links
+    // Look for [[link|label]]
+    const pattern = /\[\[([^\]\|]+)\|([^\]]+)\]\]/g;
+    markdown = markdown.replace(pattern, replaceOneLink);
+
+    return markdown;
+}
+
+
 
 // Evaluate a math formula to turn it into a number.
 // This is designed to resolve things that reference ceil() or floor()
@@ -681,7 +726,7 @@ async function documentToJSON(path, doc) {
 async function maybeTemplate(path, doc) {
     const templatePath = templateFile(doc);
     if (!templatePath) return documentToJSON(path, doc);
-    console.log(`Using handlebars template '${templatePath}' for '${doc.name}'`)
+    //console.log(`Using handlebars template '${templatePath}' for '${doc.name}'`)
 
     // Always upload the IMG, if present, but we won't include the corresponding markdown
     if (doc.img) {
@@ -696,10 +741,15 @@ async function maybeTemplate(path, doc) {
     // Apply the supplied template file:
     // Foundry renderTemplate only supports templates with file extensions: html, handlebars, hbs
     // Foundry filePicker hides all files with extension html, handlebars, hbs
-    const markdown = await myRenderTemplate(templatePath, doc).catch(err => {
+    let markdown = await myRenderTemplate(templatePath, doc).catch(err => {
         ui.notifications.warn(`Handlers Error: ${err.message}`);
         throw err;
     })
+
+    if (!use_uuid_for_notename) {
+        // Convert the UUID links to human-readable links
+        markdown = convertMarkdownLinks(markdown, doc);
+    }
 
     zip.folder(path).file(zipfilename(doc), markdown, { binary: false });
 }

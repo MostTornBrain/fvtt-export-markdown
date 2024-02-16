@@ -2,6 +2,7 @@
 ---
 obsidianUIMode: preview
 title: "{{{name}}}"
+noteType: pf2eSpell
 cssclasses: pf2e,pf2e-spell
 tags:
   - spell/level/{{system.level.value}}
@@ -15,7 +16,7 @@ tags:
 {{#if system.publication.remaster}}
   - remaster
 {{/if~}}
-aliases: ["{{{name}}}"]
+aliases: "{{{uuid}}}" 
 ---
 # {{{name}}} {{#if actionGlyph}} {{{ more-handlebars-helpers-table system.time.value "1" "`pf2:1`" "2" "`pf2:2`" "3" "`pf2:3`" "reaction" "`pf2:r`" "free" "`pf2:0`" "1 to 2" "`pf2:1` to `pf2:2`" "1 to 3" "`pf2:1` to `pf2:3`"}}}{{/if}}  
 ## {{#if isRitual}}Ritual{{else}}{{#if isCantrip}}Cantrip{{else}}{{#if isFocusSpell}}Focus{{else}}Spell{{/if}}{{/if}}{{/if}} {{system.level.value}}

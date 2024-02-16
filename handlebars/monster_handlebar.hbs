@@ -1,16 +1,22 @@
-{{! This handlebar is a modified version of one from Josh P.  It will handle Monsters exported from Foundry.  It relies on two modules, Markdown Exporter and More Handlebars Helpers.}}
+{{!-- This handlebar is a modified version of one from Josh P.  It will handle Monsters exported from Foundry.  It relies on two modules, Markdown Exporter and More Handlebars Helpers. --}}
+{{!-- me-debugDumpObject "Monster JSON" --}}
 ---
 title: "{{{name}}}"
 obsidianUIMode: preview
 noteType: pf2eMonster
-aliases: "{{{name}}}" 
+cssClasses: pf2e
+aliases: "{{{uuid}}}" 
 tags:
 {{#each system.traits.value}}  - pf2e/creature/type/{{this}}
   {{/each}}
   - pf2e/creature/level/{{system.details.level.value}}
+{{#if system.details.publication.remaster}}
+  - remaster
+{{/if~}}
 statblock: inline
 name: "{{name}}"
 level: {{system.details.level.value}}
+license: {{system.details.publication.license}}
 ---
 
 ```statblock

@@ -1,13 +1,18 @@
 {{! This handlebar is based on one courtesy of Josh P.  It will handle Hazards exported from Foundry.  It relies on two modules, Markdown Exporter and More Handlebars Helpers.}}
 ---
 title: {{{name}}}
-noteType: pf2eHazard"
-aliases:
+noteType: pf2eHazard
 tags:
 {{#each system.traits.value as |trait|}}
   - {{trait}}
 {{/each}}
-Source: {{system.details.publication.title}}
+{{#if system.details.publication.remaster}}
+  - remaster
+{{/if~}}
+source: {{system.details.publication.title}}
+aliases: "{{{uuid}}}" 
+level: {{system.details.level.value}}
+license: {{system.details.publication.license}}
 ---
 
 ```statblock
