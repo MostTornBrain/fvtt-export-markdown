@@ -481,7 +481,7 @@ export function convertHtml(doc, html) {
         markdown = markdown.replace(checkPattern, function(match, p1, p2) {
                                                         // Convert sluggified p1 to more friendly label
                                                         p1 = p1.split("-").map(word=>word.slice(0,1).toUpperCase()+word.slice(1)).join(" ");
-                                                        return `DC ${p2} ${p1}`;
+                                                        return `DC ${p2} ${p1} check`;
                                                     });
 
         // Convert @Check for "basic save" to plain text
@@ -495,9 +495,9 @@ export function convertHtml(doc, html) {
                                                         p1 = p1.split("-").map(word=>word.slice(0,1).toUpperCase()+word.slice(1)).join(" ");
 
                                                         if (basic) {
-                                                            return `basic ${p1}`;
+                                                            return `basic ${p1} check`;
                                                         } else {
-                                                            return p1;
+                                                            return `${p1} check`;
                                                         }   
                                                     });
 
