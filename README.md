@@ -51,7 +51,7 @@ Choose `Manage Modules` in your logged into Foundry world.  Enable these three m
 ![Required Modules](Screenshots/RequiredModules.png)
 
 ## 4. Configure Markdown Exporter
-Choose `Configure Settings` and pick Markdown Exporter. Ensure the following options are checked.   _NOTE:_ This is going to have all the items in the Pathfinder Compendium exported with unique, non-friendly filenames.  This is **required** if you want the internal links between notes to work.  We will address the non-friendly filenames with an Obsidian plugin in a later step.
+Choose `Configure Settings` and pick Markdown Exporter. Ensure the following options are checked.   _NOTE:_ It is recommended to **NOT** use the UUID of each document as the note name as doing so will populate your vault with a lot of random file names.
 ![Markdown Exporter](Screenshots/MarkdownExporterSettings.png)
 
 Enter the 4 handlebar names in the appropriate locations:
@@ -76,17 +76,10 @@ The exported data requires a few extra plugins in Obsidian to be viewed in the b
 ### Install and enable the following plugins. 
 * Fantasy Statblocks
 * Pathfinder 2E Action Icons
-* Front Matter Title 
 
 For the Fantasy Statblocks, you can go into its settings and disable the built-in D&D 5e SRD monsters if you aren't using D&D.
 
 ![FantasyStatblocks](Screenshots/FantasyStatblocksPlugin.png)
-
-
-The Front Matter Ttitle plugin will automatically hide filenames and replace them with the `title:` property in a note's frontmatter.  This helps hide the non-friendly unique filenames and links that Markdown Exporter generated. It will not affect any existing notes that do not have a `title:` property. 
-For the Front Matter Title plugin, there are a few recommended settings:
-
-![FontmatterTitle](Screenshots/FrontMatterTitleSettings.png)
 
 ### Install ITS
 It is also recommended to install the ITS Theme so the spells look their best. Choose Obsidian Settings, `Appearance` and in the `Themes` section pick manage, search for ITS and install and use it.
@@ -94,7 +87,7 @@ It is also recommended to install the ITS Theme so the spells look their best. C
 ![ITS](Screenshots/InstallITS.png)
 
 ### Install custom snippet
-In addition copy the `pf2e-spell.css` from this github project into your `.obsidian/snippets` folder.  (If you don't already have a snippets folder, you will need to create it.)   After you copy the snippet file, go into the Obsidian settings, choose `Appearance` and scroll down to the `Snippets` section and enable this `pf2e-spell.css` snippet.
+In addition, copy the `pf2e-spell.css` from this github project into your `.obsidian/snippets` folder.  (If you don't already have a snippets folder, you will need to create it.)   After you copy the snippet file, go into the Obsidian settings, choose `Appearance` and scroll down to the `Snippets` section and enable this `pf2e-spell.css` snippet.
 
 ![Snippet](Screenshots/EnableSnippet.png)
 
@@ -117,7 +110,7 @@ And spells should look like this:
 # TODO
 
 ## Currently in process:
-* spot checking the data for Spells, Monsters, and HAzards comparing to the published PDFs to ensure the handlebars are not missing important data for the export.
+* spot checking the data for Spells, Monsters, and Hazards comparing to the published PDFs to ensure the handlebars are not missing important data for the export.
 
 ## Future:
 Convert the rest of the document types, such as Glossary, Actions, equipment (to include cost, weight, etc.).
